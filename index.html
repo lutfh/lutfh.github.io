@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>27092025 >= 19</title>
+    <title>A Special Surprise!</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Nicer font */
@@ -43,6 +43,15 @@
             font-size: 1.1em;
             line-height: 1.6;
             margin-bottom: 20px;
+        }
+
+        /* NEW CSS RULE FOR THE INSTRUCTION PARAGRAPHS */
+        .input-instructions {
+            font-size: 0.9em; /* Makes it 90% of the normal paragraph size */
+            /* You could also use pixels, e.g., font-size: 13px; */
+            margin-bottom: 10px; /* Adjusted margin for these specific paragraphs */
+            color: #444; /* Slightly lighter text color for instructions */
+            line-height: 1.4; /* Adjust line height if needed */
         }
 
         #landing-page input[type="text"],
@@ -115,8 +124,14 @@
             h1 {
                 font-size: 1.8em;
             }
-            p {
+            p { /* General paragraph font size for mobile */
                 font-size: 1em;
+            }
+            /* Ensure instruction paragraphs are also adjusted if needed for mobile, */
+            /* or inherit correctly. 0.9em will be 90% of the above 1em. */
+            .input-instructions {
+                font-size: 0.85em; /* Slightly smaller on mobile too */
+                margin-bottom: 8px;
             }
         }
     </style>
@@ -126,6 +141,7 @@
         <div id="landing-page">
             <h1>Semangat ngerjain kalkulusnya</h1>
             <p>klo nyerah bilang aja :P tpi masa nyerah gaseruuu</p>
+            <p class="input-instructions">kalo pertidaksamaan sama dengan tulisnya pake <= atau >= ya.<br>kalo pangkat tulisnya pake ^. Contoh e^19.<br>boleh pake spasi<br></p>
             <input type="text" id="secret-code" placeholder="Masukin jawabannya disinii">
             <button onclick="checkCode()">goodluck</button>
             <p id="error-message" class="error-message" style="display:none;">mmf salah</p>
@@ -141,7 +157,7 @@
     </div>
 
     <script>
-        const CORRECT_CODE = "27092025 >= 19";
+        const CORRECT_CODE = "27092025 >= 19^th";
 
         function checkCode() {
             const enteredCode = document.getElementById('secret-code').value;
@@ -161,10 +177,10 @@
                 }, 10); // Small delay
 
                 // Optional: Auto-play the video
-                // const video = document.getElementById('birthday-video');
-                // if (video) {
-                //     video.play().catch(error => console.log("Video autoplay failed:", error));
-                // }
+                const video = document.getElementById('birthday-video');
+                if (video) {
+                    video.play().catch(error => console.log("Video autoplay failed:", error));
+                }
 
             } else {
                 errorMessage.style.display = 'block';
