@@ -1,361 +1,488 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>hbd</title>
+    <title>Flora interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #2ecc71; /* Greenish */
+            --secondary-color: #3498db; /* Blueish */
+            --background-color: #ecf0f1;
+            --card-background-color: #ffffff;
+            --text-color: #34495e;
+            --light-text-color: #7f8c8d;
+            --border-radius: 12px;
+            --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            --gauge-size: 180px;
+            --gauge-border-width: 20px;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #5c001f, #800020);
+            font-family: 'Poppins', sans-serif;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            color: #fff;
+            padding: 25px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.6;
         }
 
         .container {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            text-align: center;
-            color: #333;
-            max-width: 500px;
+            background-color: var(--card-background-color);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
             width: 100%;
+            max-width: 900px;
         }
 
         h1 {
-            color: #800020;
-            margin-bottom: 15px;
-        }
-
-        h2 {
-            color: #5c001f;
-            margin-bottom: 20px;
-        }
-
-        p {
-            font-size: 1.1em;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .input-instructions {
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            color: #444;
-            line-height: 1.4;
-        }
-
-        .problem-statement {
-            font-size: 1em;
-            background-color: #f8f0f2;
-            border: 1px solid #e0c0c8;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            margin-bottom: 20px;
-            color: #333;
-            text-align: left;
-            line-height: 1.8;
-        }
-        .problem-statement strong {
-            color: #5c001f;
-            display: block;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        .problem-statement .formula {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 1.05em;
             text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 35px;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
 
-        /* General input styling */
-        input[type="text"],
-        input[type="password"] {
-            padding: 12px 15px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 1em;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-            width: calc(100% - 32px); 
-            max-width: 300px; 
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background-color: var(--card-background-color);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--background-color);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* Quarter Ring Gauge */
+        .gauge-container-quarter {
+            width: var(--gauge-size);
+            height: var(--gauge-size);
+            position: relative;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* Penting untuk strategi clipper */
+        }
+
+        .gauge-quarter-base, .gauge-quarter-fill-clipper {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .gauge-quarter-bg, .gauge-quarter-fill {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
             box-sizing: border-box;
+            border-style: solid;
+            border-width: var(--gauge-border-width);
+            position: absolute;
         }
 
-        /* General button styling */
-        button {
-            padding: 12px 20px;
-            background-color: #800020;
+        .gauge-quarter-bg {
+            /* Warna border: atas, kanan, bawah (transparan), kiri (transparan) */
+            border-color: #e0e0e0 #e0e0e0 transparent transparent;
+            transform: rotate(-45deg); /* Menyelaraskan busur ke kuadran kanan atas */
+        }
+
+        .gauge-quarter-fill-clipper {
+             /* Ini akan memotong fill yang berputar */
+            clip-path: polygon(50% 0%, 100% 0%, 100% 50%, 50% 50%); /* Mengekspos kuadran kanan atas */
+        }
+
+        .gauge-quarter-fill {
+            /* Bagian fill memiliki warna di border atas dan kanan juga */
+            border-color: var(--secondary-color) var(--secondary-color) transparent transparent;
+            /* Transform awal di CSS akan ditimpa JS, tapi bisa berguna jika JS gagal load */
+            /* transform: rotate(45deg); /* Posisi awal untuk 0% */
+        }
+
+        .gauge-quarter-text {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--secondary-color);
+            z-index: 1;
+            position: relative;
+        }
+
+
+        .button {
+            display: block;
+            width: calc(100% - 20px);
+            padding: 14px 10px;
+            margin: 12px auto;
+            background-color: var(--secondary-color);
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1em;
+            font-weight: 600;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            width: auto; 
-            min-width: 120px; 
         }
 
-        button:hover {
-            background-color: #5c001f;
-            transform: translateY(-2px);
+        .button:hover {
+            background-color: #2980b9;
+            transform: scale(1.02);
         }
 
-        /* Styling for button specifically in pre-landing-page */
-        #pre-landing-page button {
-            display: block; /* Ensures it takes its own line */
-            margin: 10px auto 15px auto; /* Top, Sides (auto for centering), Bottom */
-            width: calc(100% - 32px); /* Match input style */
-            max-width: 300px;      /* Match input style */
-            box-sizing: border-box; /* Ensure padding is included in width calculation */
+        .button.active {
+            background-color: var(--primary-color);
+        }
+        .button.active:hover {
+            background-color: #27ae60;
         }
 
-
-        /* Specific adjustments for input/button within calculus-challenge-page input-group */
-        #calculus-challenge-page .input-group {
+        .switch-container {
             display: flex;
-            flex-direction: column; 
-            align-items: center; 
-            gap: 10px; 
-            margin-bottom: 15px;
-        }
-
-        @media (min-width: 480px) { 
-             #calculus-challenge-page .input-group {
-                flex-direction: row;
-                justify-content: center;
-            }
-            /* Input text specifically within calculus-challenge-page's input group on larger screens */
-            #calculus-challenge-page .input-group input[type="text"] {
-                 width: calc(70% - 20px);
-                 margin-right: 10px; 
-                 margin-bottom: 0; 
-            }
-            /* Button specifically within calculus-challenge-page's input group on larger screens */
-             #calculus-challenge-page .input-group button {
-                width: auto; /* Revert to auto width for this specific button if it was changed by a more general rule */
-                display: inline-block; /* Default button display */
-                margin: 0; /* Reset margins if any were set by #pre-landing-page button style */
-                /* min-width will still apply from general button style */
-            }
-        }
-
-
-        #calculus-challenge-page,
-        #content-page {
-            display: none; 
-            opacity: 0;
-            transition: opacity 1s ease-in-out;
-        }
-
-        #calculus-challenge-page.visible,
-        #content-page.visible {
-            display: block;
-            opacity: 1;
-        }
-
-        video {
-            max-width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: var(--background-color);
             border-radius: 8px;
-            margin-top: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        .error-message {
-            color: #c00;
-            margin-top: 15px;
-            font-size: 0.9em;
-            font-weight: bold;
-            display: none; 
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
         }
 
-        /* Basic responsiveness */
-        @media (max-width: 479px) { 
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .mode-text-label {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: var(--text-color);
+        }
+         #current-mode-display {
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-top: 10px;
+            font-size: 1.1em;
+        }
+
+        #data-screen {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 1em;
+            line-height: 1.8;
+            box-shadow: var(--shadow);
+        }
+        #data-screen h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 10px;
+            font-weight: 700;
+        }
+        #data-screen p {
+            margin: 8px 0;
+        }
+        #data-screen strong, #data-screen span.time-value {
+            color: #f1c40f;
+        }
+        #data-screen .label-text {
+            color: #ecf0f1;
+        }
+
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            body {
+                padding: 15px;
+            }
             .container {
                 padding: 20px;
             }
-            .problem-statement {
-                padding: 10px;
-                font-size: 0.95em;
+            :root {
+                --gauge-size: 150px;
+                --gauge-border-width: 15px;
             }
-            .problem-statement .formula {
-                font-size: 1em;
-                word-wrap: break-word;
-            }
-            /* Inputs and ALL buttons on small screens to be full width */
-            input[type="text"],
-            input[type="password"],
-            button { /* This makes ALL buttons full width on small screens */
-                width: 100% !important; 
-                max-width: none !important; /* Override max-width from #pre-landing-page button */
-                margin-right: 0 !important;
-                margin-left: 0 !important;
-                margin-bottom: 10px !important;
-                display: block !important; /* Ensure block display */
-            }
-             #calculus-challenge-page .input-group {
-                flex-direction: column; 
-            }
-             #calculus-challenge-page .input-group input[type="text"],
-             #calculus-challenge-page .input-group button {
-                width: 100% !important; /* Ensure full width inside input-group too */
-             }
-
-            h1 {
-                font-size: 1.8em;
-            }
-            p {
-                font-size: 1em;
-            }
-            .input-instructions {
-                font-size: 0.85em;
-                margin-bottom: 8px;
+            .gauge-quarter-text {
+                font-size: 1.5em;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="pre-landing-page">
-            <h1>!!! supris banh !!!</h1>
-            <p>make sure kalo lu kakey asli</p>
-            <input type="text" id="user-name" placeholder="nama lengkap lu">
-            <input type="text" id="special-question-answer" placeholder="Kucing ras kesukaan lu apa?">
-            <button onclick="checkPreLanding()">Lanjut</button>
-            <p id="pre-error-message" class="error-message">dih salah dah</p>
+        <h1>F L O R A</h1>
+
+        <div id="data-screen" class="card">
+            <h3>Real-time Monitoring</h3>
+            <p><span class="label-text">Kelembaban Tanah: </span><strong id="screen-kelembaban">N/A</strong></p>
+            <p><span class="label-text">Suhu Udara: </span><strong id="screen-suhu">N/A</strong> °C</p>
+            <p><span class="label-text">Kelembaban Udara: </span><strong id="screen-udara">N/A</strong> %</p>
+            <p><span class="label-text">Intensitas Cahaya: </span><strong id="screen-cahaya">N/A</strong> Lux</p>
+            <p><span class="label-text">Mode Sistem: </span><strong id="screen-mode">Manual</strong></p>
+            <p><span class="label-text">Pompa Air Terakhir Aktif: </span><span class="time-value" id="screen-pompa-air-timer">Belum Pernah</span></p>
+            <p><span class="label-text">Pompa Pupuk Terakhir Aktif: </span><span class="time-value" id="screen-pompa-pupuk-timer">Belum Pernah</span></p>
         </div>
 
-        <div id="calculus-challenge-page">
-            <h1>Semangat ngerjain kalkulusnya</h1>
-            <p>klo nyerah bilang aja :P tpi masa nyerah gaseruuu</p>
-
-            <div class="problem-statement">
-                <div class="formula">
-                    ( &int;<sub>0</sub><sup>ln(27000001)</sup> e<sup>z<sub>1</sub></sup> dz<sub>1</sub> + &int;<sub>0</sub><sup>ln(90001)</sup> e<sup>z<sub>2</sub></sup> dz<sub>2</sub> + &int;<sub>0</sub><sup>ln(2026)</sup> e<sup>z<sub>3</sub></sup> dz<sub>3</sub> ) &ge; <br> ( ln(19) &sdot; &int;<sub>0</sub><sup>th</sup> e<sup>ln(19<sup>x</sup>)</sup> dx ) + 1
+        <div class="main-grid">
+            <div class="card">
+                <h3>Kelembaban Tanah</h3>
+                <div class="gauge-container-quarter">
+                    <div class="gauge-quarter-base">
+                        <div class="gauge-quarter-bg"></div>
+                    </div>
+                    <div class="gauge-quarter-fill-clipper">
+                         <div class="gauge-quarter-fill" id="soil-moisture-gauge-fill"></div>
+                    </div>
+                    <div class="gauge-quarter-text" id="soil-moisture-value-text">0%</div>
                 </div>
+                 <p style="text-align:center; font-size:0.85em; color: var(--light-text-color);">(Simulasi)</p>
             </div>
-            <p class="input-instructions">kalo pertidaksamaan sama dengan tulisnya pake <= atau >= ya.<br>kalo pangkat tulisnya pake ^. Contoh e^19.<br>boleh pake spasi<br></p>
-            <div class="input-group">
-                <input type="text" id="secret-code" placeholder="Masukin jawabannya disinii">
-                <button onclick="checkCalculusCode()">goodluck</button>
-            </div>
-            <p id="calculus-error-message" class="error-message">mmf salah</p>
-        </div>
 
-        <div id="content-page">
-            <h2>kata gua sih hbd ya</h2>
-            <video id="birthday-video" width="560" height="315" controls>
-                <source src="YOUR_VIDEO_URL.mp4" type="video/mp4"> Your browser does not support the video tag.
-            </video>
+            <div class="card">
+                <h3>Mode Kontrol</h3>
+                <div class="switch-container">
+                    <span class="mode-text-label">Manual</span>
+                    <label class="switch">
+                        <input type="checkbox" id="mode-switch">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="mode-text-label">Otomatis</span>
+                </div>
+                <p id="current-mode-display">Mode Saat Ini: <strong>Manual</strong></p>
+            </div>
+
+            <div class="card" id="manual-controls-card">
+                <h3>Kontrol Manual</h3>
+                <button class="button" id="pompa-air-btn" data-status="off">Pompa Air: MATI</button>
+                <button class="button" id="pompa-pupuk-btn" data-status="off">Pompa Pupuk: MATI</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- Konfigurasi untuk Halaman Pra-Landing ---
-        const CORRECT_NAME = "Kayla Fiyaza Nawal Zaghbi"; 
-        const CORRECT_SPECIAL_ANSWER = "Sphynx"; 
+        // DOM Elements
+        const soilMoistureGaugeFill = document.getElementById('soil-moisture-gauge-fill');
+        const soilMoistureValueText = document.getElementById('soil-moisture-value-text');
 
-        // --- Konfigurasi untuk Halaman Kalkulus ---
-        const CORRECT_CALCULUS_CODE = "27092025 >= 19^th";
+        const modeSwitch = document.getElementById('mode-switch');
+        const currentModeDisplay = document.getElementById('current-mode-display').querySelector('strong');
+        const pompaAirBtn = document.getElementById('pompa-air-btn');
+        const pompaPupukBtn = document.getElementById('pompa-pupuk-btn');
+        const manualControlsCard = document.getElementById('manual-controls-card');
 
-        const preLandingPage = document.getElementById('pre-landing-page');
-        const calculusChallengePage = document.getElementById('calculus-challenge-page');
-        const contentPage = document.getElementById('content-page');
-        
-        const preErrorMessage = document.getElementById('pre-error-message');
-        const calculusErrorMessage = document.getElementById('calculus-error-message');
-        const container = document.querySelector('.container');
+        // Data Screen Elements
+        const screenKelembaban = document.getElementById('screen-kelembaban');
+        const screenSuhu = document.getElementById('screen-suhu');
+        const screenUdara = document.getElementById('screen-udara');
+        const screenCahaya = document.getElementById('screen-cahaya');
+        const screenMode = document.getElementById('screen-mode');
+        const screenPompaAirTimer = document.getElementById('screen-pompa-air-timer');
+        const screenPompaPupukTimer = document.getElementById('screen-pompa-pupuk-timer');
 
-        function showPage(pageToShow) {
-            const pages = [preLandingPage, calculusChallengePage, contentPage];
-            pages.forEach(page => {
-                if (page === pageToShow) {
-                    page.style.display = 'block';
-                    setTimeout(() => { page.classList.add('visible'); }, 10);
-                } else {
-                    page.style.display = 'none';
-                    page.classList.remove('visible');
-                }
-            });
+        let sistemMode = 'manual';
+        let pompaAirLastOpTimestamp = null;
+        let pompaPupukLastOpTimestamp = null;
+
+        // --- Gauge Update Function ---
+        function updateKelembabanTanahGauge(nilai) {
+            const percentage = Math.max(0, Math.min(100, nilai));
+            soilMoistureValueText.textContent = percentage + '%';
+            screenKelembaban.textContent = percentage + '%';
+
+            // Kalkulasi rotasi yang diperbaiki:
+            // 0% fill = rotasi +45deg (awal busur fill di jam 3, di luar area visible)
+            // 100% fill = rotasi -45deg (awal busur fill di jam 12, mengisi penuh area visible)
+            // Rentang rotasi adalah 90 derajat.
+            const fillRotation = 45 - (percentage / 100) * 90;
+            soilMoistureGaugeFill.style.transform = `rotate(${fillRotation}deg)`;
         }
 
-        function triggerErrorAnimation() {
-            container.classList.add('shake-animation');
-            setTimeout(() => {
-                container.classList.remove('shake-animation');
-            }, 500);
+
+        // --- Sensor Data Update Functions ---
+        function updateSuhu(nilai) {
+            screenSuhu.textContent = nilai;
         }
 
-        function checkPreLanding() {
-            const enteredName = document.getElementById('user-name').value.trim();
-            const enteredSpecialAnswer = document.getElementById('special-question-answer').value.trim();
+        function updateKelembabanUdara(nilai) {
+            screenUdara.textContent = nilai;
+        }
 
-            // Case-insensitive comparison for flexibility
-            if (enteredName.toLowerCase() === CORRECT_NAME.toLowerCase() && 
-                enteredSpecialAnswer.toLowerCase() === CORRECT_SPECIAL_ANSWER.toLowerCase()) {
-                preErrorMessage.style.display = 'none';
-                showPage(calculusChallengePage);
+        function updateCahaya(nilai) {
+            screenCahaya.textContent = nilai;
+        }
+
+        // --- Mode Control ---
+        modeSwitch.addEventListener('change', function() {
+            if (this.checked) {
+                sistemMode = 'otomatis';
+                currentModeDisplay.textContent = 'Otomatis';
+                manualControlsCard.style.opacity = '0.5';
+                manualControlsCard.style.pointerEvents = 'none';
+                pompaAirBtn.disabled = true;
+                pompaPupukBtn.disabled = true;
             } else {
-                preErrorMessage.style.display = 'block';
-                document.getElementById('user-name').value = '';
-                document.getElementById('special-question-answer').value = '';
-                document.getElementById('user-name').focus();
-                triggerErrorAnimation();
+                sistemMode = 'manual';
+                currentModeDisplay.textContent = 'Manual';
+                manualControlsCard.style.opacity = '1';
+                manualControlsCard.style.pointerEvents = 'auto';
+                pompaAirBtn.disabled = false;
+                pompaPupukBtn.disabled = false;
             }
-        }
-
-        function checkCalculusCode() {
-            const enteredCode = document.getElementById('secret-code').value.trim(); 
-
-            if (enteredCode === CORRECT_CALCULUS_CODE) {
-                calculusErrorMessage.style.display = 'none';
-                showPage(contentPage);
-
-                const video = document.getElementById('birthday-video');
-                if (video) {
-                    video.play().catch(error => console.log("Video autoplay failed:", error));
-                }
-            } else {
-                calculusErrorMessage.style.display = 'block';
-                document.getElementById('secret-code').value = '';
-                document.getElementById('secret-code').focus();
-                triggerErrorAnimation();
-            }
-        }
-
-        // Initial page to show (Pre-Landing Page)
-        document.addEventListener('DOMContentLoaded', () => {
-            showPage(preLandingPage); 
-            const initialFocusElement = document.getElementById('user-name');
-            if(initialFocusElement) {
-                initialFocusElement.focus();
-            }
+            screenMode.textContent = sistemMode.charAt(0).toUpperCase() + sistemMode.slice(1);
         });
 
-        // Add a class for a subtle shake animation on error
-        const styleSheet = document.createElement("style");
-        styleSheet.type = "text/css";
-        styleSheet.innerText = `
-            @keyframes shake {
-                0% { transform: translateX(0); }
-                25% { transform: translateX(-5px); }
-                50% { transform: translateX(5px); }
-                75% { transform: translateX(-5px); }
-                100% { transform: translateX(0); }
+        // --- Pump Control ---
+        function formatTimeSince(timestamp) {
+            if (!timestamp) return "Belum pernah";
+            const now = new Date();
+            const secondsPast = Math.floor((now - timestamp) / 1000);
+
+            if (secondsPast < 5) return "Baru saja";
+            if (secondsPast < 60) return `${secondsPast} dtk lalu`;
+            const minutesPast = Math.floor(secondsPast / 60);
+            if (minutesPast < 60) return `${minutesPast} mnt lalu`;
+            const hoursPast = Math.floor(minutesPast / 60);
+            if (hoursPast < 24) return `${hoursPast} jam lalu`;
+            const daysPast = Math.floor(hoursPast / 24);
+            return `${daysPast} hari lalu`;
+        }
+
+        function updatePumpTimers() {
+            screenPompaAirTimer.textContent = formatTimeSince(pompaAirLastOpTimestamp);
+            screenPompaPupukTimer.textContent = formatTimeSince(pompaPupukLastOpTimestamp);
+        }
+
+
+        function togglePompa(pompaBtn, pompaName, lastOpTimestampKey) {
+            if (sistemMode === 'manual') {
+                let currentStatus = pompaBtn.dataset.status;
+                if (currentStatus === 'off') {
+                    pompaBtn.dataset.status = 'on';
+                    pompaBtn.textContent = `${pompaName}: NYALA`;
+                    pompaBtn.classList.add('active');
+                    if (lastOpTimestampKey === 'pompaAir') pompaAirLastOpTimestamp = new Date();
+                    else if (lastOpTimestampKey === 'pompaPupuk') pompaPupukLastOpTimestamp = new Date();
+                    updatePumpTimers();
+                } else {
+                    pompaBtn.dataset.status = 'off';
+                    pompaBtn.textContent = `${pompaName}: MATI`;
+                    pompaBtn.classList.remove('active');
+                }
+            } else {
+                alert("Mode Otomatis aktif. Pindah ke mode Manual untuk mengontrol pompa.");
             }
-            .shake-animation {
-                animation: shake 0.5s ease-in-out;
-            }
-        `;
-        document.head.appendChild(styleSheet);
+        }
+
+        pompaAirBtn.addEventListener('click', function() {
+            togglePompa(this, 'Pompa Air', 'pompaAir');
+        });
+
+        pompaPupukBtn.addEventListener('click', function() {
+            togglePompa(this, 'Pompa Pupuk', 'pompaPupuk');
+        });
+
+        // --- Simulate Sensor Data (Replace with Firebase data) ---
+        function simulasiData() {
+            // Tes dengan nilai spesifik untuk gauge, misal 47%
+            // updateKelembabanTanahGauge(47);
+            updateKelembabanTanahGauge(Math.floor(Math.random() * 101)); // Atau gunakan random
+            updateSuhu((Math.random() * 15 + 20).toFixed(1));
+            updateKelembabanUdara(Math.floor(Math.random() * 51 + 40));
+            updateCahaya(Math.floor(Math.random() * 1200 + 50));
+        }
+
+        // --- Initial Setup & Intervals ---
+        function initializeDashboard() {
+            currentModeDisplay.textContent = 'Manual';
+            screenMode.textContent = 'Manual';
+            manualControlsCard.style.opacity = '1';
+            manualControlsCard.style.pointerEvents = 'auto';
+            pompaAirBtn.disabled = false;
+            pompaPupukBtn.disabled = false;
+            // Set transform awal untuk gauge fill ke posisi 0%
+            soilMoistureGaugeFill.style.transform = `rotate(45deg)`;
+
+
+            simulasiData();
+            setInterval(simulasiData, 5000);
+            setInterval(updatePumpTimers, 5000);
+            updatePumpTimers();
+        }
+
+        initializeDashboard();
+
     </script>
 </body>
 </html>
