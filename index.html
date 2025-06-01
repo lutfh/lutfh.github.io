@@ -3,39 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Special Surprise!</title>
+    <title>hbd</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Nicer font */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #5c001f, #800020); /* Maroon gradient */
+            background: linear-gradient(135deg, #5c001f, #800020);
             margin: 0;
-            padding: 20px; /* Add padding for smaller screens */
-            box-sizing: border-box; /* Ensures padding doesn't add to width/height */
-            color: #fff; /* Default text color for better contrast on maroon */
+            padding: 20px;
+            box-sizing: border-box;
+            color: #fff;
         }
 
         .container {
-            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white for a softer look */
+            background-color: rgba(255, 255, 255, 0.95);
             padding: 30px 40px;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             text-align: center;
-            color: #333; /* Darker text color for content inside the container */
-            max-width: 500px; /* Max width for the container */
-            width: 100%; /* Responsive width */
+            color: #333;
+            max-width: 500px;
+            width: 100%;
         }
 
         h1 {
-            color: #800020; /* Maroon color for heading */
+            color: #800020;
             margin-bottom: 15px;
         }
 
         h2 {
-            color: #5c001f; /* Darker maroon for sub-heading */
+            color: #5c001f;
             margin-bottom: 20px;
         }
 
@@ -45,49 +45,118 @@
             margin-bottom: 20px;
         }
 
-        /* NEW CSS RULE FOR THE INSTRUCTION PARAGRAPHS */
         .input-instructions {
-            font-size: 0.9em; /* Makes it 90% of the normal paragraph size */
-            /* You could also use pixels, e.g., font-size: 13px; */
-            margin-bottom: 10px; /* Adjusted margin for these specific paragraphs */
-            color: #444; /* Slightly lighter text color for instructions */
-            line-height: 1.4; /* Adjust line height if needed */
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            color: #444;
+            line-height: 1.4;
         }
 
-        #landing-page input[type="text"],
-        #landing-page input[type="password"] { /* Password type is better for secret codes */
+        .problem-statement {
+            font-size: 1em;
+            background-color: #f8f0f2;
+            border: 1px solid #e0c0c8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: left;
+            line-height: 1.8;
+        }
+        .problem-statement strong {
+            color: #5c001f;
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .problem-statement .formula {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.05em;
+            text-align: center;
+        }
+
+        /* General input styling */
+        input[type="text"],
+        input[type="password"] {
             padding: 12px 15px;
-            margin-right: 10px;
+            margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 1em;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-            width: calc(70% - 20px); /* Adjust width */
-            max-width: 250px;
+            width: calc(100% - 32px); 
+            max-width: 300px; 
+            box-sizing: border-box;
         }
 
-        #landing-page button {
+        /* General button styling */
+        button {
             padding: 12px 20px;
-            background-color: #800020; /* Maroon button */
+            background-color: #800020;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1em;
             transition: background-color 0.3s ease, transform 0.2s ease;
+            width: auto; 
+            min-width: 120px; 
         }
 
-        #landing-page button:hover {
-            background-color: #5c001f; /* Darker maroon on hover */
-            transform: translateY(-2px); /* Slight lift on hover */
+        button:hover {
+            background-color: #5c001f;
+            transform: translateY(-2px);
         }
 
+        /* Styling for button specifically in pre-landing-page */
+        #pre-landing-page button {
+            display: block; /* Ensures it takes its own line */
+            margin: 10px auto 15px auto; /* Top, Sides (auto for centering), Bottom */
+            width: calc(100% - 32px); /* Match input style */
+            max-width: 300px;      /* Match input style */
+            box-sizing: border-box; /* Ensure padding is included in width calculation */
+        }
+
+
+        /* Specific adjustments for input/button within calculus-challenge-page input-group */
+        #calculus-challenge-page .input-group {
+            display: flex;
+            flex-direction: column; 
+            align-items: center; 
+            gap: 10px; 
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 480px) { 
+             #calculus-challenge-page .input-group {
+                flex-direction: row;
+                justify-content: center;
+            }
+            /* Input text specifically within calculus-challenge-page's input group on larger screens */
+            #calculus-challenge-page .input-group input[type="text"] {
+                 width: calc(70% - 20px);
+                 margin-right: 10px; 
+                 margin-bottom: 0; 
+            }
+            /* Button specifically within calculus-challenge-page's input group on larger screens */
+             #calculus-challenge-page .input-group button {
+                width: auto; /* Revert to auto width for this specific button if it was changed by a more general rule */
+                display: inline-block; /* Default button display */
+                margin: 0; /* Reset margins if any were set by #pre-landing-page button style */
+                /* min-width will still apply from general button style */
+            }
+        }
+
+
+        #calculus-challenge-page,
         #content-page {
-            display: none; /* Hidden by default */
-            opacity: 0; /* Start fully transparent for fade-in */
-            transition: opacity 1s ease-in-out; /* Smooth fade-in transition */
+            display: none; 
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
         }
 
+        #calculus-challenge-page.visible,
         #content-page.visible {
             display: block;
             opacity: 1;
@@ -101,36 +170,53 @@
         }
 
         .error-message {
-            color: #c00; /* Brighter red for error */
+            color: #c00;
             margin-top: 15px;
             font-size: 0.9em;
             font-weight: bold;
+            display: none; 
         }
 
         /* Basic responsiveness */
-        @media (max-width: 480px) {
+        @media (max-width: 479px) { 
             .container {
                 padding: 20px;
             }
-            #landing-page input[type="text"],
-            #landing-page input[type="password"] {
-                width: 100%;
-                margin-right: 0;
-                margin-bottom: 10px;
+            .problem-statement {
+                padding: 10px;
+                font-size: 0.95em;
             }
-            #landing-page button {
-                width: 100%;
+            .problem-statement .formula {
+                font-size: 1em;
+                word-wrap: break-word;
             }
+            /* Inputs and ALL buttons on small screens to be full width */
+            input[type="text"],
+            input[type="password"],
+            button { /* This makes ALL buttons full width on small screens */
+                width: 100% !important; 
+                max-width: none !important; /* Override max-width from #pre-landing-page button */
+                margin-right: 0 !important;
+                margin-left: 0 !important;
+                margin-bottom: 10px !important;
+                display: block !important; /* Ensure block display */
+            }
+             #calculus-challenge-page .input-group {
+                flex-direction: column; 
+            }
+             #calculus-challenge-page .input-group input[type="text"],
+             #calculus-challenge-page .input-group button {
+                width: 100% !important; /* Ensure full width inside input-group too */
+             }
+
             h1 {
                 font-size: 1.8em;
             }
-            p { /* General paragraph font size for mobile */
+            p {
                 font-size: 1em;
             }
-            /* Ensure instruction paragraphs are also adjusted if needed for mobile, */
-            /* or inherit correctly. 0.9em will be 90% of the above 1em. */
             .input-instructions {
-                font-size: 0.85em; /* Slightly smaller on mobile too */
+                font-size: 0.85em;
                 margin-bottom: 8px;
             }
         }
@@ -138,63 +224,123 @@
 </head>
 <body>
     <div class="container">
-        <div id="landing-page">
+        <div id="pre-landing-page">
+            <h1>!!! supris banh !!!</h1>
+            <p>make sure kalo lu kakey asli</p>
+            <input type="text" id="user-name" placeholder="nama lengkap lu">
+            <input type="text" id="special-question-answer" placeholder="Kucing ras kesukaan lu apa?">
+            <button onclick="checkPreLanding()">Lanjut</button>
+            <p id="pre-error-message" class="error-message">dih salah dah</p>
+        </div>
+
+        <div id="calculus-challenge-page">
             <h1>Semangat ngerjain kalkulusnya</h1>
             <p>klo nyerah bilang aja :P tpi masa nyerah gaseruuu</p>
+
+            <div class="problem-statement">
+                <div class="formula">
+                    ( &int;<sub>0</sub><sup>ln(27000001)</sup> e<sup>z<sub>1</sub></sup> dz<sub>1</sub> + &int;<sub>0</sub><sup>ln(90001)</sup> e<sup>z<sub>2</sub></sup> dz<sub>2</sub> + &int;<sub>0</sub><sup>ln(2026)</sup> e<sup>z<sub>3</sub></sup> dz<sub>3</sub> ) &ge; <br> ( ln(19) &sdot; &int;<sub>0</sub><sup>th</sup> e<sup>ln(19<sup>x</sup>)</sup> dx ) + 1
+                </div>
+            </div>
             <p class="input-instructions">kalo pertidaksamaan sama dengan tulisnya pake <= atau >= ya.<br>kalo pangkat tulisnya pake ^. Contoh e^19.<br>boleh pake spasi<br></p>
-            <input type="text" id="secret-code" placeholder="Masukin jawabannya disinii">
-            <button onclick="checkCode()">goodluck</button>
-            <p id="error-message" class="error-message" style="display:none;">mmf salah</p>
+            <div class="input-group">
+                <input type="text" id="secret-code" placeholder="Masukin jawabannya disinii">
+                <button onclick="checkCalculusCode()">goodluck</button>
+            </div>
+            <p id="calculus-error-message" class="error-message">mmf salah</p>
         </div>
 
         <div id="content-page">
             <h2>kata gua sih hbd ya</h2>
             <video id="birthday-video" width="560" height="315" controls>
-                <source src="angry_grumpy cat meme (green screen).mp4" type="video/mp4">
-                Your browser does not support the video tag.
+                <source src="YOUR_VIDEO_URL.mp4" type="video/mp4"> Your browser does not support the video tag.
             </video>
         </div>
     </div>
 
     <script>
-        const CORRECT_CODE = "27092025 >= 19^th";
+        // --- Konfigurasi untuk Halaman Pra-Landing ---
+        const CORRECT_NAME = "Kayla Fiyaza Nawal Zaghbi"; 
+        const CORRECT_SPECIAL_ANSWER = "Sphynx"; 
 
-        function checkCode() {
-            const enteredCode = document.getElementById('secret-code').value;
-            const landingPage = document.getElementById('landing-page');
-            const contentPage = document.getElementById('content-page');
-            const errorMessage = document.getElementById('error-message');
+        // --- Konfigurasi untuk Halaman Kalkulus ---
+        const CORRECT_CALCULUS_CODE = "27092025 >= 19^th";
 
-            if (enteredCode === CORRECT_CODE) {
-                // Hide landing page
-                landingPage.style.display = 'none';
-                errorMessage.style.display = 'none';
+        const preLandingPage = document.getElementById('pre-landing-page');
+        const calculusChallengePage = document.getElementById('calculus-challenge-page');
+        const contentPage = document.getElementById('content-page');
+        
+        const preErrorMessage = document.getElementById('pre-error-message');
+        const calculusErrorMessage = document.getElementById('calculus-error-message');
+        const container = document.querySelector('.container');
 
-                // Show content page with animation
-                contentPage.style.display = 'block'; // Set display to block first
-                setTimeout(() => { // Timeout to allow the display property to apply before opacity transition
-                    contentPage.classList.add('visible');
-                }, 10); // Small delay
+        function showPage(pageToShow) {
+            const pages = [preLandingPage, calculusChallengePage, contentPage];
+            pages.forEach(page => {
+                if (page === pageToShow) {
+                    page.style.display = 'block';
+                    setTimeout(() => { page.classList.add('visible'); }, 10);
+                } else {
+                    page.style.display = 'none';
+                    page.classList.remove('visible');
+                }
+            });
+        }
 
-                // Optional: Auto-play the video
+        function triggerErrorAnimation() {
+            container.classList.add('shake-animation');
+            setTimeout(() => {
+                container.classList.remove('shake-animation');
+            }, 500);
+        }
+
+        function checkPreLanding() {
+            const enteredName = document.getElementById('user-name').value.trim();
+            const enteredSpecialAnswer = document.getElementById('special-question-answer').value.trim();
+
+            // Case-insensitive comparison for flexibility
+            if (enteredName.toLowerCase() === CORRECT_NAME.toLowerCase() && 
+                enteredSpecialAnswer.toLowerCase() === CORRECT_SPECIAL_ANSWER.toLowerCase()) {
+                preErrorMessage.style.display = 'none';
+                showPage(calculusChallengePage);
+            } else {
+                preErrorMessage.style.display = 'block';
+                document.getElementById('user-name').value = '';
+                document.getElementById('special-question-answer').value = '';
+                document.getElementById('user-name').focus();
+                triggerErrorAnimation();
+            }
+        }
+
+        function checkCalculusCode() {
+            const enteredCode = document.getElementById('secret-code').value.trim(); 
+
+            if (enteredCode === CORRECT_CALCULUS_CODE) {
+                calculusErrorMessage.style.display = 'none';
+                showPage(contentPage);
+
                 const video = document.getElementById('birthday-video');
                 if (video) {
                     video.play().catch(error => console.log("Video autoplay failed:", error));
                 }
-
             } else {
-                errorMessage.style.display = 'block';
-                document.getElementById('secret-code').value = ''; // Clear the input field
-                // Optional: Shake animation for the input or error message
-                const container = document.querySelector('.container');
-                container.classList.add('shake-animation');
-                setTimeout(() => {
-                    container.classList.remove('shake-animation');
-                }, 500);
+                calculusErrorMessage.style.display = 'block';
+                document.getElementById('secret-code').value = '';
+                document.getElementById('secret-code').focus();
+                triggerErrorAnimation();
             }
         }
 
-        // Add a class for a subtle shake animation on error (optional)
+        // Initial page to show (Pre-Landing Page)
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage(preLandingPage); 
+            const initialFocusElement = document.getElementById('user-name');
+            if(initialFocusElement) {
+                initialFocusElement.focus();
+            }
+        });
+
+        // Add a class for a subtle shake animation on error
         const styleSheet = document.createElement("style");
         styleSheet.type = "text/css";
         styleSheet.innerText = `
