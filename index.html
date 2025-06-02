@@ -329,39 +329,35 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script>
         // --- Inisialisasi Firebase ---
-        // !!! PENTING: Ganti nilai di bawah ini dengan konfigurasi proyek Firebase Anda !!!
+        // Gunakan konfigurasi yang Anda berikan dari Firebase Console
         const firebaseConfig = {
-            apiKey: "GANTI_DENGAN_API_KEY_ANDA", 
-            authDomain: "GANTI_DENGAN_PROJECT_ID_ANDA.firebaseapp.com", 
-            databaseURL: "https://GANTI_DENGAN_NAMA_DATABASE_ANDA.firebaseio.com/", 
-            projectId: "GANTI_DENGAN_PROJECT_ID_ANDA", 
-            storageBucket: "GANTI_DENGAN_PROJECT_ID_ANDA.appspot.com", 
-            // messagingSenderId: "SENDER_ID_ANDA", // Opsional
-            // appId: "APP_ID_ANDA" // Opsional
+          apiKey: "AIzaSyDI6m1AzYlkyPCuiFNYDyDBe-6tQumPby4",
+          authDomain: "flora-107d3.firebaseapp.com",
+          databaseURL: "https://flora-107d3-default-rtdb.firebaseio.com", // Pastikan URL ini benar
+          projectId: "flora-107d3",
+          storageBucket: "flora-107d3.appspot.com", // Seringkali .appspot.com untuk Realtime DB config, tapi .firebasestorage.app juga bisa muncul. Yang penting databaseURL.
+          messagingSenderId: "984261860272",
+          appId: "1:984261860272:web:f84a6ce90d535c96121475"
         };
 
-        // Inisialisasi Firebase
+        let database; 
         try {
             firebase.initializeApp(firebaseConfig);
-            var database = firebase.database(); // Gunakan var agar bisa diakses di luar try-catch jika perlu, atau const jika hanya di scope ini
-            console.log("Firebase Initialized!");
+            database = firebase.database(); 
+            console.log("Firebase Initialized SUCCESSFULLY with your provided config!");
         } catch (e) {
-            console.error("Error initializing Firebase. Check your firebaseConfig object.", e);
-            alert("Tidak dapat menginisialisasi Firebase. Periksa console untuk detail.");
+            console.error("Error initializing Firebase. Check your firebaseConfig object and ensure Firebase SDKs are loaded correctly.", e);
+            alert("Tidak dapat menginisialisasi Firebase. Periksa console browser untuk detail dan pastikan firebaseConfig sudah benar.");
         }
         
-
-        // --- DOM Elements ---
         const soilMoistureGaugeFill = document.getElementById('soil-moisture-gauge-fill');
         const soilMoistureValueText = document.getElementById('soil-moisture-value-text');
         const soilMoistureRaw = document.getElementById('soil-moisture-raw'); 
-
         const modeSwitch = document.getElementById('mode-switch');
         const currentModeDisplay = document.getElementById('current-mode-display').querySelector('strong');
         const pompaAirBtn = document.getElementById('pompa-air-btn');
         const pompaPupukBtn = document.getElementById('pompa-pupuk-btn');
         const manualControlsCard = document.getElementById('manual-controls-card');
-
         const screenKelembaban = document.getElementById('screen-kelembaban');
         const screenSuhu = document.getElementById('screen-suhu');
         const screenUdara = document.getElementById('screen-udara');
@@ -376,71 +372,63 @@
 
         function updateKelembabanTanahGauge(nilai) {
             const percentage = Math.max(0, Math.min(100, parseInt(nilai) || 0));
-            soilMoistureValueText.textContent = percentage + '%';
-            screenKelembaban.textContent = percentage + '%';
-            soilMoistureRaw.textContent = `(Raw: ${nilai !== null ? nilai : 'N/A'})`;
-
+            if(soilMoistureValueText) soilMoistureValueText.textContent = percentage + '%';
+            if(screenKelembaban) screenKelembaban.textContent = percentage + '%';
+            if(soilMoistureRaw) soilMoistureRaw.textContent = `(Raw: ${nilai !== null ? nilai : 'N/A'})`;
             const fillRotation = 45 - (percentage / 100) * 90;
-            soilMoistureGaugeFill.style.transform = `rotate(${fillRotation}deg)`;
+            if(soilMoistureGaugeFill) soilMoistureGaugeFill.style.transform = `rotate(${fillRotation}deg)`;
         }
 
         function updateSuhu(nilai) {
-            screenSuhu.textContent = (nilai !== null ? nilai : 'N/A');
+            if(screenSuhu) screenSuhu.textContent = (nilai !== null ? nilai : 'N/A');
         }
 
         function updateKelembabanUdara(nilai) {
-            screenUdara.textContent = (nilai !== null ? nilai : 'N/A');
+            if(screenUdara) screenUdara.textContent = (nilai !== null ? nilai : 'N/A');
         }
 
         function updateCahaya(nilai) {
-            screenCahaya.textContent = (nilai !== null ? nilai : 'N/A');
+            if(screenCahaya) screenCahaya.textContent = (nilai !== null ? nilai : 'N/A');
         }
 
-        modeSwitch.addEventListener('change', function() {
-            let newMode;
-            if (this.checked) {
-                sistemMode = 'otomatis'; 
-                newMode = 'otomatis';
-                currentModeDisplay.textContent = 'Otomatis';
-                manualControlsCard.style.opacity = '0.5';
-                manualControlsCard.style.pointerEvents = 'none';
-                if (pompaAirBtn) pompaAirBtn.disabled = true;
-                if (pompaPupukBtn) pompaPupukBtn.disabled = true;
-            } else {
-                sistemMode = 'manual'; 
-                newMode = 'manual';
-                currentModeDisplay.textContent = 'Manual';
-                manualControlsCard.style.opacity = '1';
-                manualControlsCard.style.pointerEvents = 'auto';
-                if (pompaAirBtn) pompaAirBtn.disabled = false;
-                if (pompaPupukBtn) pompaPupukBtn.disabled = false;
-            }
-            screenMode.textContent = sistemMode.charAt(0).toUpperCase() + sistemMode.slice(1);
+        if(modeSwitch) {
+            modeSwitch.addEventListener('change', function() {
+                let newMode;
+                if (this.checked) {
+                    sistemMode = 'otomatis'; 
+                    newMode = 'otomatis';
+                    if(currentModeDisplay) currentModeDisplay.textContent = 'Otomatis';
+                    if(manualControlsCard) {
+                        manualControlsCard.style.opacity = '0.5';
+                        manualControlsCard.style.pointerEvents = 'none';
+                    }
+                    if (pompaAirBtn) pompaAirBtn.disabled = true;
+                    if (pompaPupukBtn) pompaPupukBtn.disabled = true;
+                } else {
+                    sistemMode = 'manual'; 
+                    newMode = 'manual';
+                    if(currentModeDisplay) currentModeDisplay.textContent = 'Manual';
+                    if(manualControlsCard) {
+                        manualControlsCard.style.opacity = '1';
+                        manualControlsCard.style.pointerEvents = 'auto';
+                    }
+                    if (pompaAirBtn) pompaAirBtn.disabled = false;
+                    if (pompaPupukBtn) pompaPupukBtn.disabled = false;
+                }
+                if(screenMode) screenMode.textContent = sistemMode.charAt(0).toUpperCase() + sistemMode.slice(1);
 
-            if (database) { // Pastikan database sudah diinisialisasi
-                database.ref('control/systemMode').set(newMode)
-                    .then(() => console.log("Mode sistem diupdate ke Firebase: " + newMode))
-                    .catch(err => console.error("Gagal update mode sistem ke Firebase: ", err));
-            }
-        });
+                if (database) { 
+                    database.ref('control/systemMode').set(newMode)
+                        .then(() => console.log("Mode sistem diupdate ke Firebase: " + newMode))
+                        .catch(err => console.error("Gagal update mode sistem ke Firebase: ", err));
+                }
+            });
+        }
         
         function formatTimeSinceFirebaseMillis(espMillis) {
             if (!espMillis || espMillis == 0) { 
                 return "Belum pernah";
             }
-            // Ini adalah interpretasi yang sangat kasar dan mungkin tidak akurat
-            // karena kita tidak tahu kapan ESP32 boot relatif terhadap waktu browser.
-            // Sebaiknya ESP32 mengirim timestamp UTC atau string yang sudah diformat.
-            const now = Date.now(); // Waktu browser dalam milidetik sejak epoch
-            const espBootEstimate = now - espMillis; // Perkiraan kasar waktu boot ESP32 (jika espMillis adalah uptime)
-                                                   // Ini tidak akan akurat jika espMillis BUKAN uptime.
-                                                   // Jika espMillis adalah timestamp absolut dari epoch tapi dari jam ESP32,
-                                                   // maka bisa langsung new Date(espMillis)
-            
-            // Karena ESP32 mengirimkan String(millis()) yang merupakan uptime ESP32
-            // kita tidak bisa langsung mengubahnya menjadi "X menit lalu" yang absolut.
-            // Pilihan terbaik: tampilkan apa adanya atau biarkan ESP32 yang format.
-            // Untuk demo, kita tampilkan saja:
             let seconds = Math.floor(espMillis / 1000);
             let minutes = Math.floor(seconds / 60);
             let hours = Math.floor(minutes / 60);
@@ -457,14 +445,13 @@
             return "Baru saja (ESP)";
         }
 
-
         function updatePumpTimers() {
-            screenPompaAirTimer.textContent = formatTimeSinceFirebaseMillis(pompaAirLastOpTimestamp);
-            screenPompaPupukTimer.textContent = formatTimeSinceFirebaseMillis(pompaPupukLastOpTimestamp);
+            if(screenPompaAirTimer) screenPompaAirTimer.textContent = formatTimeSinceFirebaseMillis(pompaAirLastOpTimestamp);
+            if(screenPompaPupukTimer) screenPompaPupukTimer.textContent = formatTimeSinceFirebaseMillis(pompaPupukLastOpTimestamp);
         }
 
         function togglePompa(pompaBtn, pompaName, firebaseControlPath) {
-            if (sistemMode === 'manual' && database) { 
+            if (sistemMode === 'manual' && database && pompaBtn) { 
                 const currentReportedStatusIsOn = pompaBtn.dataset.status === 'on';
                 let newCommand = !currentReportedStatusIsOn;
 
@@ -495,51 +482,62 @@
                 console.error("Firebase database is not initialized. Listeners cannot be set up.");
                 return;
             }
-            console.log("Setting up Firebase listeners...");
+            console.log("Setting up Firebase listeners..."); 
             
-            const sensorBasePath = 'sensors/';
-            database.ref(sensorBasePath + 'soilMoisture').on('value', (s) => { if (s.val() !== null) updateKelembabanTanahGauge(s.val());}, (e) => console.error("E:soilM",e));
-            database.ref(sensorBasePath + 'temperature').on('value', (s) => { if (s.val() !== null) updateSuhu(s.val().toFixed(1));}, (e) => console.error("E:temp",e));
-            database.ref(sensorBasePath + 'humidity').on('value', (s) => { if (s.val() !== null) updateKelembabanUdara(s.val().toFixed(1));}, (e) => console.error("E:hum",e));
-            database.ref(sensorBasePath + 'lightLevel').on('value', (s) => { if (s.val() !== null) updateCahaya(s.val());}, (e) => console.error("E:light",e));
+            const listenToPath = (path, callback, uiElementName) => {
+                console.log(`Attaching listener to Firebase path: ${path} for UI element: ${uiElementName}`);
+                database.ref(path).on('value', (snapshot) => {
+                    const value = snapshot.val();
+                    console.log(`Data received from Firebase [${path}]:`, value);
+                    callback(value);
+                }, (error) => {
+                    console.error(`Error reading from Firebase [${path}] for ${uiElementName}:`, error);
+                    if(uiElementName === 'soilMoisture') updateKelembabanTanahGauge(null);
+                    else if(uiElementName === 'temperature') updateSuhu(null);
+                    else if(uiElementName === 'humidity') updateKelembabanUdara(null);
+                    else if(uiElementName === 'lightLevel') updateCahaya(null);
+                });
+            };
 
-            const pumpBasePath = 'pumps/';
-            database.ref(pumpBasePath + 'water/state').on('value', (s) => {
-                const isActive = s.val();
+            listenToPath('sensors/soilMoisture', (val) => { if (val !== null) updateKelembabanTanahGauge(val); else updateKelembabanTanahGauge(0); }, 'soilMoisture');
+            listenToPath('sensors/temperature', (val) => { if (val !== null) updateSuhu(parseFloat(val).toFixed(1)); else updateSuhu(null); }, 'temperature');
+            listenToPath('sensors/humidity', (val) => { if (val !== null) updateKelembabanUdara(parseFloat(val).toFixed(1)); else updateKelembabanUdara(null); }, 'humidity');
+            listenToPath('sensors/lightLevel', (val) => { if (val !== null) updateCahaya(val); else updateCahaya(null); }, 'lightLevel');
+
+            listenToPath('pumps/water/state', (isActive) => {
                 if (isActive !== null && pompaAirBtn) {
                     pompaAirBtn.dataset.status = isActive ? 'on' : 'off';
                     pompaAirBtn.textContent = `Pompa Air: ${isActive ? 'NYALA' : 'MATI'}`;
                     isActive ? pompaAirBtn.classList.add('active') : pompaAirBtn.classList.remove('active');
                 }
-            }, (e) => console.error("E:pWaterState",e));
+            }, 'waterPumpState');
             
-            database.ref(pumpBasePath + 'fertilizer/state').on('value', (s) => {
-                const isActive = s.val();
+            listenToPath('pumps/fertilizer/state', (isActive) => {
                 if (isActive !== null && pompaPupukBtn) {
                     pompaPupukBtn.dataset.status = isActive ? 'on' : 'off';
                     pompaPupukBtn.textContent = `Pompa Pupuk: ${isActive ? 'NYALA' : 'MATI'}`;
                     isActive ? pompaPupukBtn.classList.add('active') : pompaPupukBtn.classList.remove('active');
                 }
-            }, (e) => console.error("E:pFertState",e));
+            }, 'fertilizerPumpState');
 
-            database.ref(pumpBasePath + 'water/lastOnTimestamp').on('value', (s) => {
-                if (s.val() !== null) pompaAirLastOpTimestamp = parseInt(s.val()); else pompaAirLastOpTimestamp = null;
+            listenToPath('pumps/water/lastOnTimestamp', (timestamp) => {
+                pompaAirLastOpTimestamp = (timestamp !== null) ? parseInt(timestamp) : null;
                 updatePumpTimers(); 
-            }, (e) => console.error("E:pWaterTS",e));
+            }, 'waterPumpTimestamp');
 
-            database.ref(pumpBasePath + 'fertilizer/lastOnTimestamp').on('value', (s) => {
-                if (s.val() !== null) pompaPupukLastOpTimestamp = parseInt(s.val()); else pompaPupukLastOpTimestamp = null;
+            listenToPath('pumps/fertilizer/lastOnTimestamp', (timestamp) => {
+                pompaPupukLastOpTimestamp = (timestamp !== null) ? parseInt(timestamp) : null;
                 updatePumpTimers();
-            }, (e) => console.error("E:pFertTS",e));
+            }, 'fertilizerPumpTimestamp');
 
-            database.ref('control/systemMode').on('value', (s) => {
-                const modeDariFirebase = s.val();
-                if (modeDariFirebase && (modeDariFirebase === "manual" || modeDariFirebase === "otomatis")) {
+            listenToPath('control/systemMode', (modeDariFirebase) => {
+                 if (modeDariFirebase && (modeDariFirebase === "manual" || modeDariFirebase === "otomatis")) {
                     sistemMode = modeDariFirebase; 
-                    currentModeDisplay.textContent = sistemMode.charAt(0).toUpperCase() + sistemMode.slice(1);
-                    screenMode.textContent = sistemMode.charAt(0).toUpperCase() + sistemMode.slice(1);
+                    if(currentModeDisplay) currentModeDisplay.textContent = sistemMode.charAt(0).toUpperCase() + sistemMode.slice(1);
+                    if(screenMode) screenMode.textContent = sistemMode.charAt(0).toUpperCase() + sistemMode.slice(1);
                     const isOtomatis = sistemMode === 'otomatis';
                     if(modeSwitch) modeSwitch.checked = isOtomatis;
+                    
                     if(manualControlsCard) {
                         manualControlsCard.style.opacity = isOtomatis ? '0.5' : '1';
                         manualControlsCard.style.pointerEvents = isOtomatis ? 'none' : 'auto';
@@ -547,12 +545,12 @@
                     if(pompaAirBtn) pompaAirBtn.disabled = isOtomatis;
                     if(pompaPupukBtn) pompaPupukBtn.disabled = isOtomatis;
                 }
-            }, (e) => console.error("E:sysMode",e));
+            }, 'systemMode');
         }
 
         function initializeDashboard() {
-            currentModeDisplay.textContent = 'Manual';
-            screenMode.textContent = 'Manual';
+            if(currentModeDisplay) currentModeDisplay.textContent = 'Manual';
+            if(screenMode) screenMode.textContent = 'Manual';
             if(manualControlsCard) {
                  manualControlsCard.style.opacity = '1';
                  manualControlsCard.style.pointerEvents = 'auto';
@@ -561,11 +559,31 @@
             if(pompaPupukBtn) pompaPupukBtn.disabled = false;
             if(soilMoistureGaugeFill) soilMoistureGaugeFill.style.transform = `rotate(45deg)`; 
 
-            if (typeof firebase !== 'undefined' && typeof database !== 'undefined') {
-                 setupFirebaseListeners(); 
+            if (typeof firebase !== 'undefined' && firebase.app()) { 
+                 if (database) { 
+                    setupFirebaseListeners(); 
+                 } else {
+                    console.warn("Firebase database object not ready yet, will retry listener setup in 2s if app is initialized...");
+                    // Mungkin firebase.app() ada tapi database belum, beri jeda jika init asinkron
+                     setTimeout(() => {
+                        if (firebase.app() && !database) { // Jika app ada tapi database belum
+                            try {
+                                database = firebase.database();
+                                console.log("Firebase database object re-initialized.");
+                                setupFirebaseListeners();
+                            } catch(e) {
+                                console.error("Failed to re-initialize database object:", e);
+                            }
+                        } else if (database) { // Jika database sudah ada saat timeout
+                             setupFirebaseListeners();
+                        } else {
+                             console.error("Firebase app initialized but database object still not available after delay.");
+                        }
+                    }, 2000);
+                 }
             } else {
-                console.warn("Firebase not fully initialized yet, listeners will be set up once ready or check config.");
-                // Anda bisa mencoba setup listener lagi setelah delay jika init gagal pertama kali
+                console.error("Firebase SDK not loaded or app not initialized! Check firebaseConfig and SDK script tags.");
+                alert("Firebase tidak termuat dengan benar. Periksa console dan konfigurasi.");
             }
 
             setInterval(updatePumpTimers, 30000); 
