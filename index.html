@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flora interface</title>
+    <title>Flora Interface</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -75,7 +75,6 @@
             font-weight: 600;
         }
 
-        /* Quarter Ring Gauge */
         .gauge-container-quarter {
             width: var(--gauge-size);
             height: var(--gauge-size);
@@ -84,7 +83,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* Penting untuk strategi clipper */
+            overflow: hidden;
         }
 
         .gauge-quarter-base, .gauge-quarter-fill-clipper {
@@ -106,21 +105,17 @@
         }
 
         .gauge-quarter-bg {
-            /* Warna border: atas, kanan, bawah (transparan), kiri (transparan) */
             border-color: #e0e0e0 #e0e0e0 transparent transparent;
-            transform: rotate(-45deg); /* Menyelaraskan busur ke kuadran kanan atas */
+            transform: rotate(-45deg);
         }
 
         .gauge-quarter-fill-clipper {
-             /* Ini akan memotong fill yang berputar */
-            clip-path: polygon(50% 0%, 100% 0%, 100% 50%, 50% 50%); /* Mengekspos kuadran kanan atas */
+            clip-path: polygon(50% 0%, 100% 0%, 100% 50%, 50% 50%);
         }
 
         .gauge-quarter-fill {
-            /* Bagian fill memiliki warna di border atas dan kanan juga */
             border-color: var(--secondary-color) var(--secondary-color) transparent transparent;
-            /* Transform awal di CSS akan ditimpa JS, tapi bisa berguna jika JS gagal load */
-            /* transform: rotate(45deg); /* Posisi awal untuk 0% */
+            transform: rotate(45deg); /* Initial 0% position */
         }
 
         .gauge-quarter-text {
@@ -130,7 +125,6 @@
             z-index: 1;
             position: relative;
         }
-
 
         .button {
             display: block;
@@ -289,7 +283,7 @@
             <p><span class="label-text">Kelembaban Tanah: </span><strong id="screen-kelembaban">N/A</strong></p>
             <p><span class="label-text">Suhu Udara: </span><strong id="screen-suhu">N/A</strong> °C</p>
             <p><span class="label-text">Kelembaban Udara: </span><strong id="screen-udara">N/A</strong> %</p>
-            <p><span class="label-text">Intensitas Cahaya: </span><strong id="screen-cahaya">N/A</strong> Lux</p>
+            <p><span class="label-text">Intensitas Cahaya: </span><strong id="screen-cahaya">N/A</strong> %</p>
             <p><span class="label-text">Mode Sistem: </span><strong id="screen-mode">Manual</strong></p>
             <p><span class="label-text">Pompa Air Terakhir Aktif: </span><span class="time-value" id="screen-pompa-air-timer">Belum Pernah</span></p>
             <p><span class="label-text">Pompa Pupuk Terakhir Aktif: </span><span class="time-value" id="screen-pompa-pupuk-timer">Belum Pernah</span></p>
@@ -307,7 +301,7 @@
                     </div>
                     <div class="gauge-quarter-text" id="soil-moisture-value-text">0%</div>
                 </div>
-                 <p style="text-align:center; font-size:0.85em; color: var(--light-text-color);">(Simulasi)</p>
+                 <p id="soil-moisture-raw" style="text-align:center; font-size:0.85em; color: var(--light-text-color);">(N/A)</p>
             </div>
 
             <div class="card">
@@ -331,10 +325,36 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script> 
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script>
-        // DOM Elements
+        // --- Inisialisasi Firebase ---
+        // !!! PENTING: Ganti nilai di bawah ini dengan konfigurasi proyek Firebase Anda !!!
+        const firebaseConfig = {
+            apiKey: "GANTI_DENGAN_API_KEY_ANDA", 
+            authDomain: "GANTI_DENGAN_PROJECT_ID_ANDA.firebaseapp.com", 
+            databaseURL: "https://GANTI_DENGAN_NAMA_DATABASE_ANDA.firebaseio.com/", 
+            projectId: "GANTI_DENGAN_PROJECT_ID_ANDA", 
+            storageBucket: "GANTI_DENGAN_PROJECT_ID_ANDA.appspot.com", 
+            // messagingSenderId: "SENDER_ID_ANDA", // Opsional
+            // appId: "APP_ID_ANDA" // Opsional
+        };
+
+        // Inisialisasi Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            var database = firebase.database(); // Gunakan var agar bisa diakses di luar try-catch jika perlu, atau const jika hanya di scope ini
+            console.log("Firebase Initialized!");
+        } catch (e) {
+            console.error("Error initializing Firebase. Check your firebaseConfig object.", e);
+            alert("Tidak dapat menginisialisasi Firebase. Periksa console untuk detail.");
+        }
+        
+
+        // --- DOM Elements ---
         const soilMoistureGaugeFill = document.getElementById('soil-moisture-gauge-fill');
         const soilMoistureValueText = document.getElementById('soil-moisture-value-text');
+        const soilMoistureRaw = document.getElementById('soil-moisture-raw'); 
 
         const modeSwitch = document.getElementById('mode-switch');
         const currentModeDisplay = document.getElementById('current-mode-display').querySelector('strong');
@@ -342,7 +362,6 @@
         const pompaPupukBtn = document.getElementById('pompa-pupuk-btn');
         const manualControlsCard = document.getElementById('manual-controls-card');
 
-        // Data Screen Elements
         const screenKelembaban = document.getElementById('screen-kelembaban');
         const screenSuhu = document.getElementById('screen-suhu');
         const screenUdara = document.getElementById('screen-udara');
@@ -351,137 +370,211 @@
         const screenPompaAirTimer = document.getElementById('screen-pompa-air-timer');
         const screenPompaPupukTimer = document.getElementById('screen-pompa-pupuk-timer');
 
-        let sistemMode = 'manual';
+        let sistemMode = 'manual'; 
         let pompaAirLastOpTimestamp = null;
         let pompaPupukLastOpTimestamp = null;
 
-        // --- Gauge Update Function ---
         function updateKelembabanTanahGauge(nilai) {
-            const percentage = Math.max(0, Math.min(100, nilai));
+            const percentage = Math.max(0, Math.min(100, parseInt(nilai) || 0));
             soilMoistureValueText.textContent = percentage + '%';
             screenKelembaban.textContent = percentage + '%';
+            soilMoistureRaw.textContent = `(Raw: ${nilai !== null ? nilai : 'N/A'})`;
 
-            // Kalkulasi rotasi yang diperbaiki:
-            // 0% fill = rotasi +45deg (awal busur fill di jam 3, di luar area visible)
-            // 100% fill = rotasi -45deg (awal busur fill di jam 12, mengisi penuh area visible)
-            // Rentang rotasi adalah 90 derajat.
             const fillRotation = 45 - (percentage / 100) * 90;
             soilMoistureGaugeFill.style.transform = `rotate(${fillRotation}deg)`;
         }
 
-
-        // --- Sensor Data Update Functions ---
         function updateSuhu(nilai) {
-            screenSuhu.textContent = nilai;
+            screenSuhu.textContent = (nilai !== null ? nilai : 'N/A');
         }
 
         function updateKelembabanUdara(nilai) {
-            screenUdara.textContent = nilai;
+            screenUdara.textContent = (nilai !== null ? nilai : 'N/A');
         }
 
         function updateCahaya(nilai) {
-            screenCahaya.textContent = nilai;
+            screenCahaya.textContent = (nilai !== null ? nilai : 'N/A');
         }
 
-        // --- Mode Control ---
         modeSwitch.addEventListener('change', function() {
+            let newMode;
             if (this.checked) {
-                sistemMode = 'otomatis';
+                sistemMode = 'otomatis'; 
+                newMode = 'otomatis';
                 currentModeDisplay.textContent = 'Otomatis';
                 manualControlsCard.style.opacity = '0.5';
                 manualControlsCard.style.pointerEvents = 'none';
-                pompaAirBtn.disabled = true;
-                pompaPupukBtn.disabled = true;
+                if (pompaAirBtn) pompaAirBtn.disabled = true;
+                if (pompaPupukBtn) pompaPupukBtn.disabled = true;
             } else {
-                sistemMode = 'manual';
+                sistemMode = 'manual'; 
+                newMode = 'manual';
                 currentModeDisplay.textContent = 'Manual';
                 manualControlsCard.style.opacity = '1';
                 manualControlsCard.style.pointerEvents = 'auto';
-                pompaAirBtn.disabled = false;
-                pompaPupukBtn.disabled = false;
+                if (pompaAirBtn) pompaAirBtn.disabled = false;
+                if (pompaPupukBtn) pompaPupukBtn.disabled = false;
             }
             screenMode.textContent = sistemMode.charAt(0).toUpperCase() + sistemMode.slice(1);
+
+            if (database) { // Pastikan database sudah diinisialisasi
+                database.ref('control/systemMode').set(newMode)
+                    .then(() => console.log("Mode sistem diupdate ke Firebase: " + newMode))
+                    .catch(err => console.error("Gagal update mode sistem ke Firebase: ", err));
+            }
         });
+        
+        function formatTimeSinceFirebaseMillis(espMillis) {
+            if (!espMillis || espMillis == 0) { 
+                return "Belum pernah";
+            }
+            // Ini adalah interpretasi yang sangat kasar dan mungkin tidak akurat
+            // karena kita tidak tahu kapan ESP32 boot relatif terhadap waktu browser.
+            // Sebaiknya ESP32 mengirim timestamp UTC atau string yang sudah diformat.
+            const now = Date.now(); // Waktu browser dalam milidetik sejak epoch
+            const espBootEstimate = now - espMillis; // Perkiraan kasar waktu boot ESP32 (jika espMillis adalah uptime)
+                                                   // Ini tidak akan akurat jika espMillis BUKAN uptime.
+                                                   // Jika espMillis adalah timestamp absolut dari epoch tapi dari jam ESP32,
+                                                   // maka bisa langsung new Date(espMillis)
+            
+            // Karena ESP32 mengirimkan String(millis()) yang merupakan uptime ESP32
+            // kita tidak bisa langsung mengubahnya menjadi "X menit lalu" yang absolut.
+            // Pilihan terbaik: tampilkan apa adanya atau biarkan ESP32 yang format.
+            // Untuk demo, kita tampilkan saja:
+            let seconds = Math.floor(espMillis / 1000);
+            let minutes = Math.floor(seconds / 60);
+            let hours = Math.floor(minutes / 60);
+            let days = Math.floor(hours / 24);
 
-        // --- Pump Control ---
-        function formatTimeSince(timestamp) {
-            if (!timestamp) return "Belum pernah";
-            const now = new Date();
-            const secondsPast = Math.floor((now - timestamp) / 1000);
+            seconds %= 60;
+            minutes %= 60;
+            hours %= 24;
 
-            if (secondsPast < 5) return "Baru saja";
-            if (secondsPast < 60) return `${secondsPast} dtk lalu`;
-            const minutesPast = Math.floor(secondsPast / 60);
-            if (minutesPast < 60) return `${minutesPast} mnt lalu`;
-            const hoursPast = Math.floor(minutesPast / 60);
-            if (hoursPast < 24) return `${hoursPast} jam lalu`;
-            const daysPast = Math.floor(hoursPast / 24);
-            return `${daysPast} hari lalu`;
+            if (days > 0) return `${days}d ${hours}h lalu (ESP)`;
+            if (hours > 0) return `${hours}h ${minutes}m lalu (ESP)`;
+            if (minutes > 0) return `${minutes}m ${seconds}s lalu (ESP)`;
+            if (seconds > 5) return `${seconds}s lalu (ESP)`;
+            return "Baru saja (ESP)";
         }
+
 
         function updatePumpTimers() {
-            screenPompaAirTimer.textContent = formatTimeSince(pompaAirLastOpTimestamp);
-            screenPompaPupukTimer.textContent = formatTimeSince(pompaPupukLastOpTimestamp);
+            screenPompaAirTimer.textContent = formatTimeSinceFirebaseMillis(pompaAirLastOpTimestamp);
+            screenPompaPupukTimer.textContent = formatTimeSinceFirebaseMillis(pompaPupukLastOpTimestamp);
         }
 
+        function togglePompa(pompaBtn, pompaName, firebaseControlPath) {
+            if (sistemMode === 'manual' && database) { 
+                const currentReportedStatusIsOn = pompaBtn.dataset.status === 'on';
+                let newCommand = !currentReportedStatusIsOn;
 
-        function togglePompa(pompaBtn, pompaName, lastOpTimestampKey) {
-            if (sistemMode === 'manual') {
-                let currentStatus = pompaBtn.dataset.status;
-                if (currentStatus === 'off') {
-                    pompaBtn.dataset.status = 'on';
-                    pompaBtn.textContent = `${pompaName}: NYALA`;
-                    pompaBtn.classList.add('active');
-                    if (lastOpTimestampKey === 'pompaAir') pompaAirLastOpTimestamp = new Date();
-                    else if (lastOpTimestampKey === 'pompaPupuk') pompaPupukLastOpTimestamp = new Date();
-                    updatePumpTimers();
-                } else {
-                    pompaBtn.dataset.status = 'off';
-                    pompaBtn.textContent = `${pompaName}: MATI`;
-                    pompaBtn.classList.remove('active');
-                }
-            } else {
+                database.ref(firebaseControlPath).set(newCommand)
+                    .then(() => {
+                        console.log(`Perintah ${newCommand ? 'ON' : 'OFF'} untuk ${pompaName} terkirim!`);
+                    })
+                    .catch((error) => {
+                        console.error(`Gagal mengirim perintah untuk ${pompaName}: `, error);
+                    });
+            } else if (sistemMode !== 'manual') {
                 alert("Mode Otomatis aktif. Pindah ke mode Manual untuk mengontrol pompa.");
+            } else if (!database) {
+                alert("Koneksi Firebase belum siap.");
             }
         }
 
-        pompaAirBtn.addEventListener('click', function() {
-            togglePompa(this, 'Pompa Air', 'pompaAir');
+        if(pompaAirBtn) pompaAirBtn.addEventListener('click', function() {
+            togglePompa(this, 'Pompa Air', 'control/manualWaterPump'); 
         });
 
-        pompaPupukBtn.addEventListener('click', function() {
-            togglePompa(this, 'Pompa Pupuk', 'pompaPupuk');
+        if(pompaPupukBtn) pompaPupukBtn.addEventListener('click', function() {
+            togglePompa(this, 'Pompa Pupuk', 'control/manualFertilizerPump');
         });
 
-        // --- Simulate Sensor Data (Replace with Firebase data) ---
-        function simulasiData() {
-            // Tes dengan nilai spesifik untuk gauge, misal 47%
-            // updateKelembabanTanahGauge(47);
-            updateKelembabanTanahGauge(Math.floor(Math.random() * 101)); // Atau gunakan random
-            updateSuhu((Math.random() * 15 + 20).toFixed(1));
-            updateKelembabanUdara(Math.floor(Math.random() * 51 + 40));
-            updateCahaya(Math.floor(Math.random() * 1200 + 50));
+        function setupFirebaseListeners() {
+            if (!database) {
+                console.error("Firebase database is not initialized. Listeners cannot be set up.");
+                return;
+            }
+            console.log("Setting up Firebase listeners...");
+            
+            const sensorBasePath = 'sensors/';
+            database.ref(sensorBasePath + 'soilMoisture').on('value', (s) => { if (s.val() !== null) updateKelembabanTanahGauge(s.val());}, (e) => console.error("E:soilM",e));
+            database.ref(sensorBasePath + 'temperature').on('value', (s) => { if (s.val() !== null) updateSuhu(s.val().toFixed(1));}, (e) => console.error("E:temp",e));
+            database.ref(sensorBasePath + 'humidity').on('value', (s) => { if (s.val() !== null) updateKelembabanUdara(s.val().toFixed(1));}, (e) => console.error("E:hum",e));
+            database.ref(sensorBasePath + 'lightLevel').on('value', (s) => { if (s.val() !== null) updateCahaya(s.val());}, (e) => console.error("E:light",e));
+
+            const pumpBasePath = 'pumps/';
+            database.ref(pumpBasePath + 'water/state').on('value', (s) => {
+                const isActive = s.val();
+                if (isActive !== null && pompaAirBtn) {
+                    pompaAirBtn.dataset.status = isActive ? 'on' : 'off';
+                    pompaAirBtn.textContent = `Pompa Air: ${isActive ? 'NYALA' : 'MATI'}`;
+                    isActive ? pompaAirBtn.classList.add('active') : pompaAirBtn.classList.remove('active');
+                }
+            }, (e) => console.error("E:pWaterState",e));
+            
+            database.ref(pumpBasePath + 'fertilizer/state').on('value', (s) => {
+                const isActive = s.val();
+                if (isActive !== null && pompaPupukBtn) {
+                    pompaPupukBtn.dataset.status = isActive ? 'on' : 'off';
+                    pompaPupukBtn.textContent = `Pompa Pupuk: ${isActive ? 'NYALA' : 'MATI'}`;
+                    isActive ? pompaPupukBtn.classList.add('active') : pompaPupukBtn.classList.remove('active');
+                }
+            }, (e) => console.error("E:pFertState",e));
+
+            database.ref(pumpBasePath + 'water/lastOnTimestamp').on('value', (s) => {
+                if (s.val() !== null) pompaAirLastOpTimestamp = parseInt(s.val()); else pompaAirLastOpTimestamp = null;
+                updatePumpTimers(); 
+            }, (e) => console.error("E:pWaterTS",e));
+
+            database.ref(pumpBasePath + 'fertilizer/lastOnTimestamp').on('value', (s) => {
+                if (s.val() !== null) pompaPupukLastOpTimestamp = parseInt(s.val()); else pompaPupukLastOpTimestamp = null;
+                updatePumpTimers();
+            }, (e) => console.error("E:pFertTS",e));
+
+            database.ref('control/systemMode').on('value', (s) => {
+                const modeDariFirebase = s.val();
+                if (modeDariFirebase && (modeDariFirebase === "manual" || modeDariFirebase === "otomatis")) {
+                    sistemMode = modeDariFirebase; 
+                    currentModeDisplay.textContent = sistemMode.charAt(0).toUpperCase() + sistemMode.slice(1);
+                    screenMode.textContent = sistemMode.charAt(0).toUpperCase() + sistemMode.slice(1);
+                    const isOtomatis = sistemMode === 'otomatis';
+                    if(modeSwitch) modeSwitch.checked = isOtomatis;
+                    if(manualControlsCard) {
+                        manualControlsCard.style.opacity = isOtomatis ? '0.5' : '1';
+                        manualControlsCard.style.pointerEvents = isOtomatis ? 'none' : 'auto';
+                    }
+                    if(pompaAirBtn) pompaAirBtn.disabled = isOtomatis;
+                    if(pompaPupukBtn) pompaPupukBtn.disabled = isOtomatis;
+                }
+            }, (e) => console.error("E:sysMode",e));
         }
 
-        // --- Initial Setup & Intervals ---
         function initializeDashboard() {
             currentModeDisplay.textContent = 'Manual';
             screenMode.textContent = 'Manual';
-            manualControlsCard.style.opacity = '1';
-            manualControlsCard.style.pointerEvents = 'auto';
-            pompaAirBtn.disabled = false;
-            pompaPupukBtn.disabled = false;
-            // Set transform awal untuk gauge fill ke posisi 0%
-            soilMoistureGaugeFill.style.transform = `rotate(45deg)`;
+            if(manualControlsCard) {
+                 manualControlsCard.style.opacity = '1';
+                 manualControlsCard.style.pointerEvents = 'auto';
+            }
+            if(pompaAirBtn) pompaAirBtn.disabled = false;
+            if(pompaPupukBtn) pompaPupukBtn.disabled = false;
+            if(soilMoistureGaugeFill) soilMoistureGaugeFill.style.transform = `rotate(45deg)`; 
 
+            if (typeof firebase !== 'undefined' && typeof database !== 'undefined') {
+                 setupFirebaseListeners(); 
+            } else {
+                console.warn("Firebase not fully initialized yet, listeners will be set up once ready or check config.");
+                // Anda bisa mencoba setup listener lagi setelah delay jika init gagal pertama kali
+            }
 
-            simulasiData();
-            setInterval(simulasiData, 5000);
-            setInterval(updatePumpTimers, 5000);
-            updatePumpTimers();
+            setInterval(updatePumpTimers, 30000); 
+            updatePumpTimers(); 
         }
 
-        initializeDashboard();
+        document.addEventListener('DOMContentLoaded', (event) => {
+            initializeDashboard();
+        });
 
     </script>
 </body>
