@@ -1,5 +1,5 @@
 // Atur tanggal tujuan countdown
-const targetDate = new Date('2025-09-27T00:00:00');
+const targetDate = new Date('2025-09-26T11:00:00');
 
 // Ambil elemen dari HTML untuk diupdate
 const daysEl = document.getElementById('days');
@@ -7,6 +7,7 @@ const hoursEl = document.getElementById('hours');
 const minutesEl = document.getElementById('minutes');
 const secondsEl = document.getElementById('seconds');
 const countdownTimerEl = document.getElementById('countdown-timer');
+const continueButton = document.getElementById('continue-button'); // Ambil elemen tombol
 
 function updateCountdown() {
     const now = new Date();
@@ -16,6 +17,7 @@ function updateCountdown() {
     if (diff <= 0) {
         countdownTimerEl.innerHTML = "Waktu Telah Tiba";
         document.querySelector('.labels').style.display = 'none'; // Sembunyikan label
+        continueButton.style.display = 'inline-block'; // Tampilkan tombol
         clearInterval(intervalId); // Hentikan countdown
         return;
     }
