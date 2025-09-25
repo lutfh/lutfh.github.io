@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;600&display=swap');
+
+body {
+    background-color: #ffffff;
+    color: #333333;
+    font-family: 'Rubik', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+}
+
+.card {
+    background-color: #fff;
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+    line-height: 1.7;
+    font-weight: 400;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card p {
+    margin-bottom: 1.2em;
+}
+
+.action-section {
+    text-align: center;
+    margin-top: 30px;
+    /* Properti baru untuk mengatur jarak tombol */
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.button {
+    display: inline-block;
+    padding: 12px 28px;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(to bottom, #007bff, #0056b3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.button:hover {
+    background: linear-gradient(to bottom, #0069d9, #004a99);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Gaya baru untuk tombol Kembali */
+.button.back {
+    background: linear-gradient(to bottom, #6c757d, #5a6268);
+}
+
+.button.back:hover {
+    background: linear-gradient(to bottom, #5a6268, #4e555b);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 1s ease-out forwards;
+}
