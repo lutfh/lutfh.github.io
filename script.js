@@ -1,5 +1,5 @@
 // Atur tanggal tujuan countdown
-const targetDate = new Date('2025-09-26T04:46:00');
+const targetDate = new Date('2025-09-26T11:27:00');
 
 // Ambil elemen dari HTML untuk diupdate
 const daysEl = document.getElementById('days');
@@ -47,3 +47,4 @@ updateCountdown();
 // Jalankan fungsi setiap 1 detik (1000 ms)
 
 const intervalId = setInterval(updateCountdown, 1000);
+
