@@ -1,5 +1,5 @@
 // Atur tanggal tujuan countdown
-const targetDate = new Date('2025-09-26T11:00:00');
+const targetDate = new Date('2025-09-25T19:10:00');
 
 // Ambil elemen dari HTML untuk diupdate
 const daysEl = document.getElementById('days');
@@ -15,7 +15,7 @@ function updateCountdown() {
 
     // Jika waktu sudah lewat
     if (diff <= 0) {
-        countdownTimerEl.innerHTML = "Waktu Telah Tiba";
+        countdownTimerEl.innerHTML = "happy new year";
         document.querySelector('.labels').style.display = 'none'; // Sembunyikan label
         continueButton.style.display = 'inline-block'; // Tampilkan tombol
         clearInterval(intervalId); // Hentikan countdown
