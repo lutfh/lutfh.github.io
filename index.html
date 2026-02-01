@@ -3,36 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>kky hbd bgt kky</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Lutfi Budget Multi-Month</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
+    </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
 
-    <div class="container">
-        
-        <h1 class="title">Kepo bgt kayaknyaaa 👀</h1>
-        <h2 class="below_title">sabar yeahhhhh</h2>
-        
-        <div id="countdown-timer">
-            <span id="days">00</span>:
-            <span id="hours">00</span>:
-            <span id="minutes">00</span>:
-            <span id="seconds">00</span>
+    <div id="login-screen" class="fixed inset-0 bg-gray-900 z-[100] flex flex-col items-center justify-center p-4">
+        <h2 class="text-3xl font-black mb-6 text-emerald-400 tracking-tighter italic">PERSONAL_FIN_CONTROL</h2>
+        <div class="bg-gray-800 p-8 rounded-[2rem] border border-gray-700 w-full max-w-xs shadow-2xl">
+            <input type="password" id="pin-input" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 text-center text-2xl tracking-widest focus:ring-2 focus:ring-emerald-500 outline-none mb-4" placeholder="••••••">
+            <button onclick="checkPin()" class="w-full bg-emerald-600 hover:bg-emerald-500 font-bold py-4 rounded-xl transition-all">ACCESS GRANTED</button>
         </div>
-
-        <div class="labels">
-            <span>Hari</span>
-            <span>Jam</span>
-            <span>Menit</span>
-            <span>Detik</span>
-        </div>
-
-        <h2 class="below_title">tapi jangan dibuang dulu box merahnyaa, who knows you might need it in the future</h2>
-
-        <a href="letter.html" id="continue-button" class="button" style="display: none;">Lanjutkan</a>
-
     </div>
 
-    <script src="script.js"></script>
+    <div id="month-selector" class="hidden container mx-auto p-6 max-w-md pt-10">
+        <h1 class="text-3xl font-black mb-2 text-white">My Ledgers</h1>
+        <p class="text-gray-500 text-sm mb-8 italic">Pilih periode anggaran kamu:</p>
+        
+        <div id="month-list" class="grid gap-4">
+            </div>
+
+        <button onclick="addNewMonth()" class="w-full mt-10 border-2 border-dashed border-gray-700 hover:border-emerald-500 text-gray-500 hover:text-emerald-500 p-6 rounded-2xl flex flex-col items-center transition-all">
+            <span class="text-2xl font-bold">+</span>
+            <span class="text-xs font-bold uppercase tracking-widest">Tambah Bulan Baru</span>
+        </button>
+    </div>
+
+    <div id="dashboard" class="hidden container mx-auto p-4 max-w-2xl">
+        <header class="flex justify-between items-center mb-6 pt-4">
+            <div class="flex items-center gap-3">
+                <button onclick="backToHome()" class="bg-gray-800 p-2 rounded-lg text-xs">◀</button>
+                <div>
+                    <h1 id="active-month-name" class="text-2xl font-black uppercase">BULAN</h1>
+                    <p id="active-month-id" class="text-emerald-500 font-mono text-[10px] tracking-widest"></p>
+                </div>
+            </div>
+            <button onclick="toggleSettings()" class="bg-gray-800 p-2 rounded-lg border border-gray-700">⚙️</button>
+        </header>
+
+        <div id="settings-panel" class="hidden bg-gray-800 p-6 rounded-3xl border border-blue-500/30 mb-8 shadow-xl">
+            <h3 class="font-bold mb-4 text-blue-400 uppercase text-xs">Budget Configuration</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] text-gray-500 font-bold uppercase">Budget Awal (Rp)</label>
+                    <input type="number" id="set-total-budget" class="w-full bg-gray-900 p-3 rounded-lg border border-gray-700 text-white">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[10px] text-gray-500">MAKAN (%)</label><input type="number" id="pct-makan" class="w-full bg-gray-900 p-2 rounded border border-gray-700"></div>
+                    <div><label class="text-[10px] text-gray-500">HOBI (%)</label><input type="number" id="pct-hobi" class="w-full bg-gray-900 p-2 rounded border border-gray-700"></div>
+                    <div><label class="text-[10px] text-gray-500">OPR (%)</label><input type="number" id="pct-op" class="w-full bg-gray-900 p-2 rounded border border-gray-700"></div>
+                    <div><label class="text-[10px] text-gray-500">TRANS (%)</label><input type="number" id="pct-trans" class="w-full bg-gray-900 p-2 rounded border border-gray-700"></div>
+                </div>
+                <button onclick="saveSettings()" class="w-full bg-blue-600 font-bold py-3 rounded-xl">SAVE FOR THIS MONTH</button>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-3xl mb-6 shadow-lg border border-gray-700">
+            <canvas id="budgetChart" height="180"></canvas>
+            <div class="mt-6 pt-6 border-t border-gray-700">
+                <p class="text-gray-500 text-[10px] font-bold uppercase">Sisa Saldo Keseluruhan</p>
+                <h2 id="display-saldo" class="text-4xl font-black text-white mt-1">Rp ...</h2>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 mb-8 shadow-inner">
+            <div class="grid grid-cols-2 gap-3">
+                <input type="text" id="input-item" placeholder="Nama Barang" class="col-span-2 bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-emerald-500">
+                <input type="number" id="input-harga" placeholder="Harga" class="bg-gray-900 p-3 rounded-xl border border-gray-700">
+                <select id="input-kategori" class="bg-gray-900 p-3 rounded-xl border border-gray-700 text-sm">
+                    <option value="Makan & Grocery">🍱 Makan</option>
+                    <option value="Hobi & Hiburan">🏎️ Hobi</option>
+                    <option value="Operasional">🧼 Operasional</option>
+                    <option value="Transportasi">⛽ Transport</option>
+                </select>
+                <button onclick="addTransaction()" class="col-span-2 bg-emerald-600 font-bold py-4 rounded-xl mt-2 active:scale-95 transition">SAVE RECORD</button>
+            </div>
+        </div>
+
+        <div id="transaction-list" class="space-y-3 pb-10"></div>
+    </div>
+
+    <script>
+        // 1. CONFIG FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_ro5oglZYK7DkXBmdTiV4ww404ONPg1k",
+            authDomain: "lutfibudget.firebaseapp.com",
+            projectId: "lutfibudget",
+            storageBucket: "lutfibudget.firebasestorage.app",
+            messagingSenderId: "1098967984642",
+            appId: "1:1098967984642:web:4416c63c6c386ccedc951b",
+            measurementId: "G-F4W4D2ZM3Q"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let currentMonthId = "";
+        let myChart;
+        let monthConfig = { totalBudget: 3113410, pctMakan: 48, pctHobi: 36, pctOp: 8, pctTrans: 8 };
+
+        // 2. AUTH
+        function checkPin() {
+            if (document.getElementById('pin-input').value === "545256") {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('month-selector').classList.remove('hidden');
+                fetchMonths();
+            }
+        }
+
+        // 3. LOGIC BULAN
+        function fetchMonths() {
+            db.collection("months").orderBy("id", "asc").onSnapshot((snapshot) => {
+                const list = document.getElementById('month-list');
+                list.innerHTML = "";
+                
+                if(snapshot.empty) {
+                    // Jika benar-benar kosong, buatkan Februari 2026 sebagai default
+                    const firstMonth = { id: "2026-02", name: "Februari 2026" };
+                    db.collection("months").doc(firstMonth.id).set(firstMonth);
+                    db.collection("months").doc(firstMonth.id).collection("config").doc("main").set(monthConfig);
+                }
+
+                snapshot.forEach((doc) => {
+                    const m = doc.data();
+                    list.innerHTML += `
+                        <button onclick="openDashboard('${m.id}', '${m.name}')" class="bg-gray-800 hover:bg-gray-700 p-6 rounded-2xl border border-gray-700 flex justify-between items-center transition-all group">
+                            <div class="text-left">
+                                <p class="text-[10px] text-emerald-500 font-bold tracking-widest">${m.id}</p>
+                                <h3 class="text-xl font-black text-gray-200 group-hover:text-white">${m.name}</h3>
+                            </div>
+                            <span class="text-gray-600">▶</span>
+                        </button>
+                    `;
+                });
+            });
+        }
+
+        function addNewMonth() {
+            db.collection("months").orderBy("id", "desc").limit(1).get().then((snapshot) => {
+                let lastDate = new Date(2026, 1, 1); // Default Feb 2026
+                if (!snapshot.empty) {
+                    const lastId = snapshot.docs[0].id;
+                    const parts = lastId.split("-");
+                    lastDate = new Date(parts[0], parts[1], 1); // Bulan di JS itu 0-indexed, tapi kita simpan 1-indexed
+                } else {
+                    lastDate = new Date(2026, 2, 1); // Start di Maret jika Feb sudah ada
+                }
+
+                const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                const nextMonth = lastDate.getMonth();
+                const nextYear = lastDate.getFullYear();
+                
+                const newId = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}`;
+                const newName = `${monthNames[nextMonth]} ${nextYear}`;
+
+                db.collection("months").doc(newId).set({ id: newId, name: newName });
+                db.collection("months").doc(newId).collection("config").doc("main").set(monthConfig);
+            });
+        }
+
+        // 4. LOGIC DASHBOARD
+        function openDashboard(id, name) {
+            currentMonthId = id;
+            document.getElementById('active-month-name').innerText = name;
+            document.getElementById('active-month-id').innerText = id;
+            document.getElementById('month-selector').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            
+            // Load specific config for this month
+            db.collection("months").doc(id).collection("config").doc("main").onSnapshot((doc) => {
+                if(doc.exists) monthConfig = doc.data();
+                loadMonthData();
+            });
+        }
+
+        function backToHome() {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('month-selector').classList.remove('hidden');
+        }
+
+        function addTransaction() {
+            const item = document.getElementById('input-item').value;
+            const harga = parseInt(document.getElementById('input-harga').value);
+            const kategori = document.getElementById('input-kategori').value;
+
+            if (item && harga && currentMonthId) {
+                db.collection("months").doc(currentMonthId).collection("transactions").add({
+                    item: item, harga: harga, kategori: kategori,
+                    tanggal: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    document.getElementById('input-item').value = "";
+                    document.getElementById('input-harga').value = "";
+                });
+            }
+        }
+
+        function loadMonthData() {
+            db.collection("months").doc(currentMonthId).collection("transactions").orderBy("tanggal", "desc").onSnapshot((snapshot) => {
+                const list = document.getElementById('transaction-list');
+                list.innerHTML = "";
+                let sums = { "Makan & Grocery": 0, "Hobi & Hiburan": 0, "Operasional": 0, "Transportasi": 0 };
+                let totalSpent = 0;
+
+                snapshot.forEach((doc) => {
+                    const d = doc.data();
+                    sums[d.kategori] += d.harga;
+                    totalSpent += d.harga;
+                    list.innerHTML += `
+                        <div class="bg-gray-800/50 p-4 rounded-xl flex justify-between border border-gray-800">
+                            <div><p class="text-sm font-bold text-gray-200">${d.item}</p><p class="text-[9px] text-gray-500 font-black uppercase">${d.kategori}</p></div>
+                            <p class="font-mono text-sm text-red-500">-${d.harga.toLocaleString()}</p>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('display-saldo').innerText = "Rp " + (monthConfig.totalBudget - totalSpent).toLocaleString();
+                updateChart(sums);
+            });
+        }
+
+        function updateChart(sums) {
+            const ctx = document.getElementById('budgetChart').getContext('2d');
+            const limits = {
+                makan: (monthConfig.pctMakan/100) * monthConfig.totalBudget,
+                hobi: (monthConfig.pctHobi/100) * monthConfig.totalBudget,
+                op: (monthConfig.pctOp/100) * monthConfig.totalBudget,
+                trans: (monthConfig.pctTrans/100) * monthConfig.totalBudget
+            };
+            const data = [
+                (sums["Makan & Grocery"] / limits.makan) * 100,
+                (sums["Hobi & Hiburan"] / limits.hobi) * 100,
+                (sums["Operasional"] / limits.op) * 100,
+                (sums["Transportasi"] / limits.trans) * 100
+            ];
+
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Makan', 'Hobi', 'Operasional', 'Transport'],
+                    datasets: [{
+                        data: data,
+                        backgroundColor: data.map(v => v > 100 ? '#ef4444' : '#10b981'),
+                        borderRadius: 10, barThickness: 15
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', plugins: { legend: { display: false } },
+                    scales: { x: { max: 100, ticks: { color: '#6b7280' } }, y: { ticks: { color: '#9ca3af' } } }
+                }
+            });
+        }
+
+        function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden'); }
+        function saveSettings() {
+            const newConfig = {
+                totalBudget: parseInt(document.getElementById('set-total-budget').value),
+                pctMakan: parseInt(document.getElementById('pct-makan').value),
+                pctHobi: parseInt(document.getElementById('pct-hobi').value),
+                pctOp: parseInt(document.getElementById('pct-op').value),
+                pctTrans: parseInt(document.getElementById('pct-trans').value)
+            };
+            db.collection("months").doc(currentMonthId).collection("config").doc("main").set(newConfig).then(() => toggleSettings());
+        }
+    </script>
 </body>
 </html>
