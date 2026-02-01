@@ -12,25 +12,23 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
+        .btn-delete { color: #4b5563; transition: all 0.2s; cursor: pointer; }
+        .btn-delete:hover { color: #ef4444; transform: scale(1.2); }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
 
     <div id="login-screen" class="fixed inset-0 bg-gray-900 z-[100] flex flex-col items-center justify-center p-4">
-        <h2 class="text-3xl font-black mb-6 text-emerald-400 tracking-tighter italic">PERSONAL_FIN_CONTROL</h2>
+        <h2 class="text-3xl font-black mb-6 text-emerald-400 tracking-tighter italic uppercase tracking-[0.2em]">Personal_Fin_Control</h2>
         <div class="bg-gray-800 p-8 rounded-[2rem] border border-gray-700 w-full max-w-xs shadow-2xl">
             <input type="password" id="pin-input" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 text-center text-2xl tracking-widest focus:ring-2 focus:ring-emerald-500 outline-none mb-4" placeholder="••••••">
-            <button onclick="checkPin()" class="w-full bg-emerald-600 hover:bg-emerald-500 font-bold py-4 rounded-xl transition-all">ACCESS GRANTED</button>
+            <button onclick="checkPin()" class="w-full bg-emerald-600 hover:bg-emerald-500 font-bold py-4 rounded-xl transition-all active:scale-95">ACCESS GRANTED</button>
         </div>
     </div>
 
     <div id="month-selector" class="hidden container mx-auto p-6 max-w-md pt-10">
-        <h1 class="text-3xl font-black mb-2 text-white">My Ledgers</h1>
-        <p class="text-gray-500 text-sm mb-8 italic">Pilih periode anggaran kamu:</p>
-        
-        <div id="month-list" class="grid gap-4">
-            </div>
-
+        <h1 class="text-3xl font-black mb-2 text-white italic">Lutfi's Personal Ledgers</h1>
+        <div id="month-list" class="grid gap-4"></div>
         <button onclick="addNewMonth()" class="w-full mt-10 border-2 border-dashed border-gray-700 hover:border-emerald-500 text-gray-500 hover:text-emerald-500 p-6 rounded-2xl flex flex-col items-center transition-all">
             <span class="text-2xl font-bold">+</span>
             <span class="text-xs font-bold uppercase tracking-widest">Tambah Bulan Baru</span>
@@ -50,24 +48,27 @@
         </header>
 
         <div id="settings-panel" class="hidden bg-gray-800 p-6 rounded-3xl border border-blue-500/30 mb-8 shadow-xl">
-            <h3 class="font-bold mb-4 text-blue-400 uppercase text-xs">Budget Configuration</h3>
-            <div class="space-y-4">
+            <h3 class="font-bold mb-4 text-blue-400 uppercase text-xs">Configuration</h3>
+            <div class="space-y-4 text-sm">
                 <div>
                     <label class="text-[10px] text-gray-500 font-bold uppercase">Budget Awal (Rp)</label>
-                    <input type="number" id="set-total-budget" class="w-full bg-gray-900 p-3 rounded-lg border border-gray-700 text-white">
+                    <input type="number" id="set-total-budget" class="w-full bg-gray-900 p-3 rounded-lg border border-gray-700 text-white mt-1">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[10px] text-gray-500">MAKAN (%)</label><input type="number" id="pct-makan" class="w-full bg-gray-900 p-2 rounded border border-gray-700"></div>
-                    <div><label class="text-[10px] text-gray-500">HOBI (%)</label><input type="number" id="pct-hobi" class="w-full bg-gray-900 p-2 rounded border border-gray-700"></div>
-                    <div><label class="text-[10px] text-gray-500">OPR (%)</label><input type="number" id="pct-op" class="w-full bg-gray-900 p-2 rounded border border-gray-700"></div>
-                    <div><label class="text-[10px] text-gray-500">TRANS (%)</label><input type="number" id="pct-trans" class="w-full bg-gray-900 p-2 rounded border border-gray-700"></div>
+                    <div><label class="text-[10px] text-gray-500 uppercase">Makan (%)</label><input type="number" id="pct-makan" class="w-full bg-gray-900 p-2 rounded border border-gray-700 mt-1"></div>
+                    <div><label class="text-[10px] text-gray-500 uppercase">Hobi (%)</label><input type="number" id="pct-hobi" class="w-full bg-gray-900 p-2 rounded border border-gray-700 mt-1"></div>
+                    <div><label class="text-[10px] text-gray-500 uppercase">Opr (%)</label><input type="number" id="pct-op" class="w-full bg-gray-900 p-2 rounded border border-gray-700 mt-1"></div>
+                    <div><label class="text-[10px] text-gray-500 uppercase">Trans (%)</label><input type="number" id="pct-trans" class="w-full bg-gray-900 p-2 rounded border border-gray-700 mt-1"></div>
                 </div>
-                <button onclick="saveSettings()" class="w-full bg-blue-600 font-bold py-3 rounded-xl">SAVE FOR THIS MONTH</button>
+                <button onclick="saveSettings()" class="w-full bg-blue-600 font-bold py-3 rounded-xl mt-2 shadow-lg shadow-blue-900/40">SAVE CONFIG</button>
             </div>
         </div>
 
         <div class="bg-gray-800 p-6 rounded-3xl mb-6 shadow-lg border border-gray-700">
-            <canvas id="budgetChart" height="180"></canvas>
+            <canvas id="budgetChart" height="200"></canvas>
+            
+            <div id="category-breakdown" class="mt-6 space-y-3 border-t border-gray-700 pt-6"></div>
+
             <div class="mt-6 pt-6 border-t border-gray-700 grid grid-cols-2 gap-4">
                 <div>
                     <p class="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Total Terpakai</p>
@@ -80,21 +81,17 @@
             </div>
         </div>
 
-<style>
-    .btn-delete { color: #4b5563; transition: all 0.2s; }
-    .btn-delete:hover { color: #ef4444; transform: scale(1.1); }
-</style>
         <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 mb-8 shadow-inner">
-            <div class="grid grid-cols-2 gap-3">
-                <input type="text" id="input-item" placeholder="Nama Barang" class="col-span-2 bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-emerald-500">
-                <input type="number" id="input-harga" placeholder="Harga" class="bg-gray-900 p-3 rounded-xl border border-gray-700">
-                <select id="input-kategori" class="bg-gray-900 p-3 rounded-xl border border-gray-700 text-sm">
-                    <option value="Makan & Grocery">🍱 Makan</option>
-                    <option value="Hobi & Hiburan">🏎️ Hobi</option>
-                    <option value="Operasional">🧼 Operasional</option>
-                    <option value="Transportasi">⛽ Transport</option>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <input type="text" id="input-item" placeholder="Transaksi (ex: Yoshinoya)" class="col-span-2 bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-emerald-500">
+                <input type="number" id="input-harga" placeholder="Harga (Rp)" class="bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none">
+                <select id="input-kategori" class="bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none">
+                    <option value="Makan & Grocery">Makan</option>
+                    <option value="Hobi & Hiburan">Hobi</option>
+                    <option value="Operasional">Operasional</option>
+                    <option value="Transportasi">Transport</option>
                 </select>
-                <button onclick="addTransaction()" class="col-span-2 bg-emerald-600 font-bold py-4 rounded-xl mt-2 active:scale-95 transition">SAVE RECORD</button>
+                <button onclick="addTransaction()" class="col-span-2 bg-emerald-600 font-bold py-4 rounded-xl mt-2 active:scale-95 transition-all shadow-lg shadow-emerald-900/20">SAVE RECORD</button>
             </div>
         </div>
 
@@ -102,7 +99,7 @@
     </div>
 
     <script>
-        // 1. CONFIG FIREBASE
+        // 1. FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyD_ro5oglZYK7DkXBmdTiV4ww404ONPg1k",
             authDomain: "lutfibudget.firebaseapp.com",
@@ -119,58 +116,44 @@
         let myChart;
         let monthConfig = { totalBudget: 3113410, pctMakan: 48, pctHobi: 36, pctOp: 8, pctTrans: 8 };
 
-        // 2. AUTH
         function checkPin() {
             if (document.getElementById('pin-input').value === "545256") {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('month-selector').classList.remove('hidden');
                 fetchMonths();
-            }
+            } else { alert("PIN Salah!"); }
         }
 
-        // 3. LOGIC BULAN
         function fetchMonths() {
             db.collection("months").orderBy("id", "asc").onSnapshot((snapshot) => {
                 const list = document.getElementById('month-list');
                 list.innerHTML = "";
-                
-                if(snapshot.empty) {
-                    // Jika benar-benar kosong, buatkan Februari 2026 sebagai default
-                    const firstMonth = { id: "2026-02", name: "Februari 2026" };
-                    db.collection("months").doc(firstMonth.id).set(firstMonth);
-                    db.collection("months").doc(firstMonth.id).collection("config").doc("main").set(monthConfig);
-                }
-
+                if(snapshot.empty) { addNewMonth(); }
                 snapshot.forEach((doc) => {
                     const m = doc.data();
                     list.innerHTML += `
                         <button onclick="openDashboard('${m.id}', '${m.name}')" class="bg-gray-800 hover:bg-gray-700 p-6 rounded-2xl border border-gray-700 flex justify-between items-center transition-all group">
                             <div class="text-left">
-                                <p class="text-[10px] text-emerald-500 font-bold tracking-widest">${m.id}</p>
+                                <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">${m.id}</p>
                                 <h3 class="text-xl font-black text-gray-200 group-hover:text-white">${m.name}</h3>
                             </div>
-                            <span class="text-gray-600">▶</span>
-                        </button>
-                    `;
+                            <span class="text-gray-600 group-hover:translate-x-1 transition-transform">▶</span>
+                        </button>`;
                 });
             });
         }
 
         function addNewMonth() {
             db.collection("months").orderBy("id", "desc").limit(1).get().then((snapshot) => {
-                let lastDate = new Date(2026, 1, 1); // Default Feb 2026
+                let lastDate = new Date();
                 if (!snapshot.empty) {
-                    const lastId = snapshot.docs[0].id;
-                    const parts = lastId.split("-");
-                    lastDate = new Date(parts[0], parts[1], 1); // Bulan di JS itu 0-indexed, tapi kita simpan 1-indexed
-                } else {
-                    lastDate = new Date(2026, 2, 1); // Start di Maret jika Feb sudah ada
-                }
-
+                    const parts = snapshot.docs[0].id.split("-");
+                    lastDate = new Date(parts[0], parts[1], 1); 
+                } else { lastDate = new Date(2026, 1, 1); }
+                
                 const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
                 const nextMonth = lastDate.getMonth();
                 const nextYear = lastDate.getFullYear();
-                
                 const newId = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}`;
                 const newName = `${monthNames[nextMonth]} ${nextYear}`;
 
@@ -179,7 +162,6 @@
             });
         }
 
-        // 4. LOGIC DASHBOARD
         function openDashboard(id, name) {
             currentMonthId = id;
             document.getElementById('active-month-name').innerText = name;
@@ -187,9 +169,15 @@
             document.getElementById('month-selector').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             
-            // Load specific config for this month
             db.collection("months").doc(id).collection("config").doc("main").onSnapshot((doc) => {
-                if(doc.exists) monthConfig = doc.data();
+                if(doc.exists) {
+                    monthConfig = doc.data();
+                    document.getElementById('set-total-budget').value = monthConfig.totalBudget;
+                    document.getElementById('pct-makan').value = monthConfig.pctMakan;
+                    document.getElementById('pct-hobi').value = monthConfig.pctHobi;
+                    document.getElementById('pct-op').value = monthConfig.pctOp;
+                    document.getElementById('pct-trans').value = monthConfig.pctTrans;
+                }
                 loadMonthData();
             });
         }
@@ -203,8 +191,7 @@
             const item = document.getElementById('input-item').value;
             const harga = parseInt(document.getElementById('input-harga').value);
             const kategori = document.getElementById('input-kategori').value;
-
-            if (item && harga && currentMonthId) {
+            if (item && harga) {
                 db.collection("months").doc(currentMonthId).collection("transactions").add({
                     item: item, harga: harga, kategori: kategori,
                     tanggal: firebase.firestore.FieldValue.serverTimestamp()
@@ -215,89 +202,93 @@
             }
         }
 
-function deleteTransaction(docId) {
-        if (confirm("Hapus pengeluaran ini?")) {
-            db.collection("months").doc(currentMonthId)
-              .collection("transactions").doc(docId).delete()
-              .then(() => {
-                  console.log("Record deleted successfully");
-                  // UI akan update otomatis karena onSnapshot
-              }).catch((error) => {
-                  alert("Gagal menghapus: " + error);
-              });
+        function deleteTransaction(docId) {
+            if (confirm("Hapus catatan ini?")) {
+                db.collection("months").doc(currentMonthId).collection("transactions").doc(docId).delete();
+            }
         }
-    }
 
-    // MODIFIKASI FUNGSI LOAD DATA (Untuk menampilkan tombol hapus & total terpakai)
-    function loadMonthData() {
-        db.collection("months").doc(currentMonthId)
-          .collection("transactions").orderBy("tanggal", "desc")
-          .onSnapshot((snapshot) => {
-            const list = document.getElementById('transaction-list');
-            list.innerHTML = "";
-            let sums = { "Makan & Grocery": 0, "Hobi & Hiburan": 0, "Operasional": 0, "Transportasi": 0 };
-            let totalSpent = 0;
+        function loadMonthData() {
+            db.collection("months").doc(currentMonthId).collection("transactions").orderBy("tanggal", "desc").onSnapshot((snapshot) => {
+                const list = document.getElementById('transaction-list');
+                list.innerHTML = "";
+                let sums = { "Makan & Grocery": 0, "Hobi & Hiburan": 0, "Operasional": 0, "Transportasi": 0 };
+                let totalSpent = 0;
 
-            snapshot.forEach((doc) => {
-                const d = doc.data();
-                const docId = doc.id; // Ambil ID dokumen untuk fungsi hapus
-                sums[d.kategori] += d.harga;
-                totalSpent += d.harga;
-                
-                list.innerHTML += `
-                    <div class="bg-gray-800/50 p-4 rounded-xl flex justify-between items-center border border-gray-800 group">
-                        <div class="flex items-center gap-3">
-                            <button onclick="deleteTransaction('${docId}')" class="btn-delete text-lg">
-                                🗑️
-                            </button>
-                            <div>
-                                <p class="text-sm font-bold text-gray-200">${d.item}</p>
-                                <p class="text-[9px] text-gray-500 font-black uppercase tracking-tighter">${d.kategori}</p>
+                snapshot.forEach((doc) => {
+                    const d = doc.data();
+                    sums[d.kategori] += d.harga;
+                    totalSpent += d.harga;
+                    list.innerHTML += `
+                        <div class="bg-gray-800/50 p-4 rounded-xl flex justify-between items-center border border-gray-800">
+                            <div class="flex items-center gap-3">
+                                <span onclick="deleteTransaction('${doc.id}')" class="btn-delete">🗑️</span>
+                                <div><p class="text-sm font-bold text-gray-200 leading-none">${d.item}</p><p class="text-[9px] text-gray-500 font-black uppercase mt-1 tracking-tighter">${d.kategori}</p></div>
                             </div>
-                        </div>
-                        <p class="font-mono text-sm text-red-500 font-bold">-${d.harga.toLocaleString('id-ID')}</p>
-                    </div>
-                `;
-            });
+                            <p class="font-mono text-sm text-red-500 font-bold">-${d.harga.toLocaleString('id-ID')}</p>
+                        </div>`;
+                });
 
-            // Update Tampilan Dashboard
-            const sisa = monthConfig.totalBudget - totalSpent;
-            document.getElementById('display-terpakai').innerText = "Rp " + totalSpent.toLocaleString('id-ID');
-            document.getElementById('display-saldo').innerText = "Rp " + sisa.toLocaleString('id-ID');
-            
-            updateChart(sums);
-        });
-    }
+                document.getElementById('display-terpakai').innerText = "Rp " + totalSpent.toLocaleString('id-ID');
+                document.getElementById('display-saldo').innerText = "Rp " + (monthConfig.totalBudget - totalSpent).toLocaleString('id-ID');
+                updateChart(sums);
+            });
+        }
 
         function updateChart(sums) {
             const ctx = document.getElementById('budgetChart').getContext('2d');
-            const limits = {
-                makan: (monthConfig.pctMakan/100) * monthConfig.totalBudget,
-                hobi: (monthConfig.pctHobi/100) * monthConfig.totalBudget,
-                op: (monthConfig.pctOp/100) * monthConfig.totalBudget,
-                trans: (monthConfig.pctTrans/100) * monthConfig.totalBudget
-            };
-            const data = [
-                (sums["Makan & Grocery"] / limits.makan) * 100,
-                (sums["Hobi & Hiburan"] / limits.hobi) * 100,
-                (sums["Operasional"] / limits.op) * 100,
-                (sums["Transportasi"] / limits.trans) * 100
+            const breakdownDiv = document.getElementById('category-breakdown');
+            breakdownDiv.innerHTML = "";
+
+            const cats = [
+                { id: "Makan & Grocery", pct: monthConfig.pctMakan, icon: "Makan" },
+                { id: "Hobi & Hiburan", pct: monthConfig.pctHobi, icon: "Hobi" },
+                { id: "Operasional", pct: monthConfig.pctOp, icon: "Operasional" },
+                { id: "Transportasi", pct: monthConfig.pctTrans, icon: "Transportasi" }
             ];
+
+            const chartData = [];
+            cats.forEach(c => {
+                const limit = (c.pct/100) * monthConfig.totalBudget;
+                const terpakai = sums[c.id] || 0;
+                const sisa = limit - terpakai;
+                chartData.push((terpakai / limit) * 100);
+
+                breakdownDiv.innerHTML += `
+                    <div class="flex justify-between items-center text-[11px] py-1">
+                        <span class="text-gray-500 font-medium"> ${c.id.split(' ')[0]}</span>
+                        <span class="font-mono ${sisa < 0 ? 'text-red-400 font-black' : 'text-gray-300 font-bold'}">
+                            Sisa: Rp ${Math.round(sisa).toLocaleString('id-ID')}
+                        </span>
+                    </div>`;
+            });
 
             if (myChart) myChart.destroy();
             myChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Makan', 'Hobi', 'Operasional', 'Transport'],
+                    labels: cats.map(c => c.icon),
                     datasets: [{
-                        data: data,
-                        backgroundColor: data.map(v => v > 100 ? '#ef4444' : '#10b981'),
+                        data: chartData,
+                        backgroundColor: chartData.map(v => v > 100 ? '#ef4444' : '#10b981'),
                         borderRadius: 10, barThickness: 15
                     }]
                 },
                 options: {
-                    indexAxis: 'y', plugins: { legend: { display: false } },
-                    scales: { x: { max: 100, ticks: { color: '#6b7280' } }, y: { ticks: { color: '#9ca3af' } } }
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        x: { 
+                            max: 100, 
+                            display: true, // Grid persentase diaktifkan
+                            grid: { color: 'rgba(255, 255, 255, 0.05)', borderColor: 'transparent' }, 
+                            ticks: { color: '#4b5563', font: { size: 10 } } 
+                        }, 
+                        y: { 
+                            grid: { display: false }, 
+                            ticks: { font: { size: 16 } } 
+                        } 
+                    }
                 }
             });
         }
